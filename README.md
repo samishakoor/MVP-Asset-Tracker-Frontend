@@ -2,8 +2,6 @@
 
 React single-page application for **AssetTrack**, an internal asset management system. Admins manage inventory, assignments, and support tickets; employees view assigned hardware, acknowledge receipt, report issues, and browse assignment history.
 
-The app talks to the Express API in `../asset_tracker/`.
-
 ## Tech Stack
 
 | Layer | Technology |
