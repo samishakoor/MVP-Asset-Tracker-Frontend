@@ -1,0 +1,112 @@
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { useAuth } from '../hooks/useAuth.js'
+import { LOGIN_PAGE_LINK, EMPLOYEE_DASHBOARD_PATH } from '../constants/routes.js'
+
+/**
+ * Employee registration screen.
+ * Rendered at /signup inside AuthLayout; new accounts default to the employee role.
+ */
+function SignupPage() {
+  const navigate = useNavigate()
+  const { signup } = useAuth()
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  async function handleSubmit(event) {
+    event.preventDefault()
+    setError(null)
+    setIsSubmitting(true)
+
+    try {
+      await signup(name, email, password)
+      navigate(EMPLOYEE_DASHBOARD_PATH, { replace: true })
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  return (
+    <div className="w-full rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+      <h1 className="text-2xl font-semibold text-slate-900">Create account</h1>
+      <p className="mt-2 text-sm text-slate-600">Register as an employee to track your assigned assets</p>
+
+      <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+        {error && (
+          <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+            {error}
+          </div>
+        )}
+
+        <div>
+          <label htmlFor="name" className="block text-sm font-medium text-slate-700">
+            Full name
+          </label>
+          <input
+            id="name"
+            type="text"
+            autoComplete="name"
+            required
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="signup-email" className="block text-sm font-medium text-slate-700">
+            Email
+          </label>
+          <input
+            id="signup-email"
+            type="email"
+            autoComplete="email"
+            required
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="signup-password" className="block text-sm font-medium text-slate-700">
+            Password
+          </label>
+          <input
+            id="signup-password"
+            type="password"
+            autoComplete="new-password"
+            required
+            minLength={8}
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+          />
+          <p className="mt-1 text-xs text-slate-500">At least 8 characters</p>
+        </div>
+
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {isSubmitting ? 'Creating account...' : 'Create account'}
+        </button>
+      </form>
+
+      <p className="mt-6 text-center text-sm text-slate-600">
+        Already have an account?{' '}
+        <Link to={LOGIN_PAGE_LINK} className="font-medium text-emerald-600 hover:text-emerald-700">
+          Sign in
+        </Link>
+      </p>
+    </div>
+  )
+}
+
+export default SignupPage
