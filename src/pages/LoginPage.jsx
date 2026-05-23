@@ -53,7 +53,7 @@ function LoginPage() {
       }
     } catch (err) {
       if (err.message === AUTH_ERROR_MESSAGE.EMAIL_NOT_VERIFIED) {
-        toast.info('Verify your email to sign in. You can resend the verification link on the next screen.')
+        toast.info('Your email address is not verified. Please click "Resend verification email" to receive a new verification link.')
         navigate(VERIFY_EMAIL_PAGE_LINK, {
           replace: true,
           state: { email: email.trim().toLowerCase(), fromLogin: true },
