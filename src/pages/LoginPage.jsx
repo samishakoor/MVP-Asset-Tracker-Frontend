@@ -51,6 +51,9 @@ function LoginPage() {
         navigate(EMPLOYEE_DASHBOARD_PATH, { replace: true })
       }
     } catch (err) {
+      if (err.message === 'Your email is not verified. Please verify your email before signing in') {
+        toast.error(err.message)
+      }
       setError(err.message)
     } finally {
       setIsSubmitting(false)

@@ -6,6 +6,7 @@ import {
   SIGNUP_PAGE_LINK,
   FORGOT_PASSWORD_PAGE_LINK,
   RESET_PASSWORD_PAGE_LINK,
+  VERIFY_EMAIL_PAGE_LINK,
   ADMIN_BASE_PATH,
   ADMIN_DASHBOARD_LINK,
   ADMIN_ASSETS_LINK,
@@ -31,6 +32,7 @@ import LoginPage from './pages/LoginPage.jsx'
 import SignupPage from './pages/SignupPage.jsx'
 import ForgotPasswordPage from './pages/ForgotPasswordPage.jsx'
 import ResetPasswordPage from './pages/ResetPasswordPage.jsx'
+import VerifyEmailPage from './pages/VerifyEmailPage.jsx'
 import AdminDashboardPage from './pages/AdminDashboardPage.jsx'
 import AssetsListPage from './pages/AssetsListPage.jsx'
 import AddAssetPage from './pages/AddAssetPage.jsx'
@@ -54,6 +56,8 @@ export const AppRouter = () => (
       <Route path={FORGOT_PASSWORD_PAGE_LINK} element={<ForgotPasswordPage />} />
       {/* Reset password — set a new password from email link token */}
       <Route path={RESET_PASSWORD_PAGE_LINK} element={<ResetPasswordPage />} />
+      {/* Verify email — confirm address from signup or resend verification link */}
+      <Route path={VERIFY_EMAIL_PAGE_LINK} element={<VerifyEmailPage />} />
     </Route>
 
     {/* Admin — inventory and support oversight (admin role only) */}

@@ -59,10 +59,8 @@ export function AuthProvider({ children }) {
       body: JSON.stringify({ name, email, password }),
     })
 
-    const { user, token } = response.data
-    persistAuth(user, token)
-    return user
-  }, [persistAuth])
+    return response.data.user
+  }, [])
 
   const logout = useCallback(() => {
     localStorage.removeItem('token')

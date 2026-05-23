@@ -2,11 +2,12 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth.js'
-import { LOGIN_PAGE_LINK, EMPLOYEE_DASHBOARD_PATH } from '../constants/routes.js'
+import { LOGIN_PAGE_LINK, VERIFY_EMAIL_PAGE_LINK } from '../constants/routes.js'
+import { toast } from '../utils/toast.js'
 
 /**
  * Employee registration screen.
- * Rendered at /signup inside AuthLayout; new accounts default to the employee role.
+ * Rendered at /signup inside AuthLayout; new accounts require email verification.
  */
 function SignupPage() {
   const navigate = useNavigate()
@@ -29,7 +30,11 @@ function SignupPage() {
 
     try {
       await signup(name, email, password)
-      navigate(EMPLOYEE_DASHBOARD_PATH, { replace: true })
+      toast.success('Verification email sent. Please check your inbox.')
+      navigate(VERIFY_EMAIL_PAGE_LINK, {
+        replace: true,
+        state: { email, verificationEmailSent: true },
+      })
     } catch (err) {
       setError(err.message)
     } finally {
@@ -38,16 +43,16 @@ function SignupPage() {
   }
 
   return (
-    <div className="w-full rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-      <h1 className="text-2xl font-semibold text-slate-900">Create account</h1>
+    <div className="w-full rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+      <h1 className="text-xl font-semibold text-slate-900 sm:text-2xl">Create account</h1>
       <p className="mt-2 text-sm text-slate-600">Register as an employee to track your assigned assets</p>
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-        {error && (
+        {error ? (
           <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
             {error}
           </div>
-        )}
+        ) : null}
 
         <div>
           <label htmlFor="name" className="block text-sm font-medium text-slate-700">
