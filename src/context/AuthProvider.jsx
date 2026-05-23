@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useReducer } from 'react'
+import { useCallback, useEffect, useMemo, useReducer } from 'react'
 import { AuthContext } from './authContext.js'
 import { apiRequest } from '../utils/api.js'
 import { UserRole } from '../constants/auth.js'
@@ -13,6 +13,11 @@ function getStoredAuth() {
 
   try {
     const user = JSON.parse(userRaw)
+    if (user.isVerified === false) {
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
+      return { user: null, isAuthenticated: false }
+    }
     return { user, isAuthenticated: true }
   } catch {
     localStorage.removeItem('token')
@@ -35,6 +40,18 @@ const initialAuthState = getStoredAuth()
 
 export function AuthProvider({ children }) {
   const [state, dispatch] = useReducer(authReducer, initialAuthState)
+
+  useEffect(function listenForSessionExpiry() {
+    function handleSessionExpired() {
+      dispatch({ type: 'LOGOUT' })
+    }
+
+    window.addEventListener('auth-session-expired', handleSessionExpired)
+
+    return function cleanup() {
+      window.removeEventListener('auth-session-expired', handleSessionExpired)
+    }
+  }, [])
 
   const persistAuth = useCallback((user, token) => {
     localStorage.setItem('token', token)

@@ -6,10 +6,11 @@ import {
   SIGNUP_PAGE_LINK,
   LOGIN_PAGE_LINK,
   FORGOT_PASSWORD_PAGE_LINK,
+  VERIFY_EMAIL_PAGE_LINK,
   ADMIN_DASHBOARD_PATH,
   EMPLOYEE_DASHBOARD_PATH,
 } from '../constants/routes.js'
-import { UserRole } from '../constants/auth.js'
+import { UserRole, AUTH_ERROR_MESSAGE } from '../constants/auth.js'
 import { toast } from '../utils/toast.js'
 
 /**
@@ -51,8 +52,13 @@ function LoginPage() {
         navigate(EMPLOYEE_DASHBOARD_PATH, { replace: true })
       }
     } catch (err) {
-      if (err.message === 'Your email is not verified. Please verify your email before signing in') {
-        toast.error(err.message)
+      if (err.message === AUTH_ERROR_MESSAGE.EMAIL_NOT_VERIFIED) {
+        toast.info('Verify your email to sign in. You can resend the verification link on the next screen.')
+        navigate(VERIFY_EMAIL_PAGE_LINK, {
+          replace: true,
+          state: { email: email.trim().toLowerCase(), fromLogin: true },
+        })
+        return
       }
       setError(err.message)
     } finally {

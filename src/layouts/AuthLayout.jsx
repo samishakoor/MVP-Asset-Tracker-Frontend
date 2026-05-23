@@ -5,6 +5,7 @@ import {
   ADMIN_DASHBOARD_PATH,
   EMPLOYEE_DASHBOARD_PATH,
   HOME_PAGE_PATH,
+  VERIFY_EMAIL_PAGE_LINK,
 } from '../constants/routes.js'
 import { UserRole } from '../constants/auth.js'
 
@@ -16,6 +17,16 @@ function AuthLayout() {
   const { isAuthenticated, user } = useAuth()
 
   if (isAuthenticated) {
+    if (user.isVerified === false) {
+      return (
+        <Navigate
+          to={VERIFY_EMAIL_PAGE_LINK}
+          replace
+          state={{ email: user.email, fromLogin: true }}
+        />
+      )
+    }
+
     if (user.role === UserRole.ADMIN) {
       return <Navigate to={ADMIN_DASHBOARD_PATH} replace />
     }

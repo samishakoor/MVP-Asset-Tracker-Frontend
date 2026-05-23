@@ -16,6 +16,7 @@ function VerifyEmailPage() {
   const token = searchParams.get('token')
   const emailFromState = location.state?.email
   const verificationEmailSent = location.state?.verificationEmailSent === true
+  const fromLogin = location.state?.fromLogin === true
   const [email] = useState(emailFromState || '')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [verificationComplete, setVerificationComplete] = useState(false)
@@ -158,14 +159,25 @@ function VerifyEmailPage() {
   return (
     <div className="w-full rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
       <h1 className="text-xl font-semibold text-slate-900 sm:text-2xl">Verify your email</h1>
-      <p className="mt-2 text-sm text-slate-600">
-        We sent a verification link to{' '}
-        <span className="font-medium text-slate-800">{email}</span>. Open the email and click
-        Verify email to activate your account.
-      </p>
+      {fromLogin ? (
+        <p className="mt-2 text-sm text-slate-600">
+          Your account for{' '}
+          <span className="font-medium text-slate-800">{email}</span> is not verified yet. Request
+          a new verification link below, then open the email and click Verify email to activate
+          your account.
+        </p>
+      ) : (
+        <p className="mt-2 text-sm text-slate-600">
+          We sent a verification link to{' '}
+          <span className="font-medium text-slate-800">{email}</span>. Open the email and click
+          Verify email to activate your account.
+        </p>
+      )}
 
       <div className="mt-6 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
-        Did not receive the email? Check your spam folder or resend after the timer below.
+        {fromLogin
+          ? 'Did not receive an email or your link expired? Resend a fresh verification link below.'
+          : 'Did not receive the email? Check your spam folder or resend after the timer below.'}
       </div>
 
       <div className="mt-6 space-y-3">

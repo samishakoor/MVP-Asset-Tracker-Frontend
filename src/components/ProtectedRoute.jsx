@@ -2,6 +2,7 @@ import { Navigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth.js'
 import {
   LOGIN_PAGE_LINK,
+  VERIFY_EMAIL_PAGE_LINK,
   ADMIN_DASHBOARD_PATH,
   EMPLOYEE_DASHBOARD_PATH,
 } from '../constants/routes.js'
@@ -16,6 +17,16 @@ function ProtectedRoute({ children, allowedRole }) {
 
   if (!isAuthenticated) {
     return <Navigate to={LOGIN_PAGE_LINK} replace />
+  }
+
+  if (user.isVerified === false) {
+    return (
+      <Navigate
+        to={VERIFY_EMAIL_PAGE_LINK}
+        replace
+        state={{ email: user.email, fromLogin: true }}
+      />
+    )
   }
 
   if (allowedRole && user.role !== allowedRole) {

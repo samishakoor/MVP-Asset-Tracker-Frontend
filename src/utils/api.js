@@ -1,3 +1,5 @@
+import { AUTH_ERROR_MESSAGE } from '../constants/auth.js'
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
 /**
@@ -32,6 +34,13 @@ export async function apiRequest(path, options) {
 
   if (!response.ok) {
     const message = body.message || `Request failed with status ${response.status}`
+
+    if (response.status === 403 && message === AUTH_ERROR_MESSAGE.EMAIL_NOT_VERIFIED) {
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
+      window.dispatchEvent(new CustomEvent('auth-session-expired'))
+    }
+
     throw new Error(message)
   }
 
