@@ -1,13 +1,16 @@
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth.js'
 import {
   SIGNUP_PAGE_LINK,
+  LOGIN_PAGE_LINK,
+  FORGOT_PASSWORD_PAGE_LINK,
   ADMIN_DASHBOARD_PATH,
   EMPLOYEE_DASHBOARD_PATH,
 } from '../constants/routes.js'
 import { UserRole } from '../constants/auth.js'
+import { toast } from '../utils/toast.js'
 
 /**
  * Login screen for admins and employees.
@@ -15,12 +18,20 @@ import { UserRole } from '../constants/auth.js'
  */
 function LoginPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { login } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  useEffect(() => {
+    if (location.state?.passwordResetSuccess === true) {
+      toast.success('Your password has been reset. Sign in with your new password.')
+      navigate(LOGIN_PAGE_LINK, { replace: true, state: {} })
+    }
+  }, [location.state, navigate])
 
   function handleTogglePasswordVisibility() {
     setShowPassword((prev) => !prev)
@@ -74,9 +85,17 @@ function LoginPage() {
         </div>
 
         <div>
-          <label htmlFor="password" className="block text-sm font-medium text-slate-700">
-            Password
-          </label>
+          <div className="flex items-center justify-between">
+            <label htmlFor="password" className="block text-sm font-medium text-slate-700">
+              Password
+            </label>
+            <Link
+              to={FORGOT_PASSWORD_PAGE_LINK}
+              className="text-sm font-medium text-emerald-600 hover:text-emerald-700"
+            >
+              Forgot password?
+            </Link>
+          </div>
           <div className="relative mt-1">
             <input
               id="password"

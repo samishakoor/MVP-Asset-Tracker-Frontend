@@ -4,6 +4,8 @@ import {
   LANDING_PAGE_LINK,
   LOGIN_PAGE_LINK,
   SIGNUP_PAGE_LINK,
+  FORGOT_PASSWORD_PAGE_LINK,
+  RESET_PASSWORD_PAGE_LINK,
   ADMIN_BASE_PATH,
   ADMIN_DASHBOARD_LINK,
   ADMIN_ASSETS_LINK,
@@ -27,6 +29,8 @@ import ProtectedRoute from './components/ProtectedRoute.jsx'
 import HomePage from './pages/HomePage.jsx'
 import LoginPage from './pages/LoginPage.jsx'
 import SignupPage from './pages/SignupPage.jsx'
+import ForgotPasswordPage from './pages/ForgotPasswordPage.jsx'
+import ResetPasswordPage from './pages/ResetPasswordPage.jsx'
 import AdminDashboardPage from './pages/AdminDashboardPage.jsx'
 import AssetsListPage from './pages/AssetsListPage.jsx'
 import AddAssetPage from './pages/AddAssetPage.jsx'
@@ -46,6 +50,10 @@ export const AppRouter = () => (
     <Route element={<AuthLayout />}>
       <Route path={LOGIN_PAGE_LINK} element={<LoginPage />} />
       <Route path={SIGNUP_PAGE_LINK} element={<SignupPage />} />
+      {/* Forgot password — request a reset link by email */}
+      <Route path={FORGOT_PASSWORD_PAGE_LINK} element={<ForgotPasswordPage />} />
+      {/* Reset password — set a new password from email link token */}
+      <Route path={RESET_PASSWORD_PAGE_LINK} element={<ResetPasswordPage />} />
     </Route>
 
     {/* Admin — inventory and support oversight (admin role only) */}
