@@ -16,7 +16,7 @@ function EmployeeLayout() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const { unreadCount } = useNotifications()
+  const { unreadCount } = useNotifications({ page: 1, limit: 1 })
 
   function handleLogout() {
     logout()

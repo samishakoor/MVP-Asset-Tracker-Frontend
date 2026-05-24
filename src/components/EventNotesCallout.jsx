@@ -49,10 +49,15 @@ function EventNotesCallout({ notes, eventType }) {
       aria-label={label}
     >
       <div className="flex items-start gap-2.5 sm:gap-3">
-        <MessageSquareQuote
-          className={`mt-0.5 h-4 w-4 shrink-0 sm:h-5 sm:w-5 ${styles.icon}`}
+        <span
+          className="mt-0.5 inline-flex size-6 shrink-0 items-center justify-center sm:size-7"
           aria-hidden="true"
-        />
+        >
+          <MessageSquareQuote
+            className={`size-4 overflow-visible ${styles.icon}`}
+            strokeWidth={1.5}
+          />
+        </span>
         <div className="min-w-0 flex-1">
           <p className={`text-xs font-semibold uppercase tracking-wide ${styles.label}`}>
             {label}

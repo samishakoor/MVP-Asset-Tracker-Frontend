@@ -21,7 +21,7 @@ function AuditEventRow({
   const attribution = getEventAttribution(eventType, triggeredByName, targetEmployeeName)
 
   return (
-    <div className="flex gap-4 p-3 sm:p-5">
+    <div className="flex gap-4 p-3 sm:p-4">
       <div className="flex flex-col items-center">
         <div className="h-3 w-3 shrink-0 rounded-full bg-emerald-500" />
         <div className="w-px flex-1 bg-slate-200" />

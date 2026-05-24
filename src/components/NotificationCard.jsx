@@ -69,10 +69,10 @@ const DEFAULT_STYLES = {
 }
 
 /**
- * Card displaying a single notification with type badge, relative time, and read indicator.
- * Unread cards use a colored left accent and a "New" badge on the right; read cards show a check.
+ * List row displaying a single notification with type badge, relative time, and read indicator.
+ * Unread rows use a subtle background and a "New" badge on the right; read rows show a check.
  * Clicking an unread notification marks it as read.
- * Used on NotificationsPage.
+ * Used on NotificationsPage inside a divided list container.
  */
 function NotificationCard({ notification }) {
   const { markAsRead, isMarking } = useMarkNotificationRead()
@@ -94,9 +94,9 @@ function NotificationCard({ notification }) {
     }
   }
 
-  const cardClassName = isUnread
-    ? `border-slate-200 bg-white shadow-sm ring-1 ring-emerald-500/10 hover:border-emerald-200 hover:shadow-md ${styles.accent}`
-    : 'border-slate-200 bg-white shadow-sm hover:border-slate-300 hover:shadow-md border-l-4 border-l-transparent'
+  const rowClassName = isUnread
+    ? 'bg-emerald-50/40 hover:bg-emerald-50/60'
+    : 'bg-white hover:bg-slate-50'
 
   const timeLabel = (
     <span className="inline-flex items-center gap-1 whitespace-nowrap text-xs text-slate-400">
@@ -117,7 +117,7 @@ function NotificationCard({ notification }) {
           ? `${notification.title}. Unread. Click to mark as read.`
           : `${notification.title}. Read.`
       }
-      className={`group w-full rounded-2xl border border-l-4 p-4 text-left transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 disabled:cursor-wait sm:p-5 ${cardClassName}`}
+      className={`group w-full p-4 text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-inset disabled:cursor-wait sm:p-5 ${rowClassName}`}
     >
       <div className="flex gap-3 sm:gap-4">
         <div
