@@ -6,6 +6,7 @@ import { useAssignAsset } from '../hooks/useAssignAsset.js'
 import { useReturnAsset } from '../hooks/useReturnAsset.js'
 import { PageHeader, Spinner, Table, ConfirmDialog } from '../components/index.js'
 import { formatDate } from '../utils/datetime.js'
+import { AssetStatus } from '../constants/assets.js'
 import { toast } from '../utils/toast.js'
 
 /**
@@ -93,6 +94,7 @@ function AssignmentsPage() {
         employeeName: asset.assignedEmployeeName || '—',
         assignedAt: asset.currentAssignment?.assignedAt,
         acknowledgedAt: asset.currentAssignment?.acknowledgedAt,
+        status: asset.status,
         currentAssignment: asset.currentAssignment,
       }))
   }, [assignedAssets])
@@ -114,15 +116,24 @@ function AssignmentsPage() {
     {
       key: 'actions',
       label: 'Actions',
-      render: (_, row) => (
-        <button
-          type="button"
-          onClick={() => handleReturnClick(row)}
-          className="rounded-lg bg-red-100 px-3 py-1.5 text-sm font-medium text-red-700 transition-colors hover:bg-red-200"
-        >
-          Return
-        </button>
-      ),
+      render: (_, row) => {
+        const canReturn =
+          row.status !== AssetStatus.AVAILABLE && row.status !== AssetStatus.ASSIGNED
+
+        if (!canReturn) {
+          return <span className="text-sm font-medium text-slate-600">—</span>
+        }
+
+        return (
+          <button
+            type="button"
+            onClick={() => handleReturnClick(row)}
+            className="rounded-lg bg-red-100 px-3 py-1.5 text-sm font-medium text-red-700 transition-colors hover:bg-red-200"
+          >
+            Return
+          </button>
+        )
+      },
     },
   ]
 

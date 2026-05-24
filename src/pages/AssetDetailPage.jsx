@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Package, Trash2 } from 'lucide-react'
 import { ADMIN_ASSETS_PATH } from '../constants/routes.js'
+import { AssetStatus } from '../constants/assets.js'
 import { useAsset } from '../hooks/useAsset.js'
 import { useReturnAsset } from '../hooks/useReturnAsset.js'
 import { useReviewTicket } from '../hooks/useReviewTicket.js'
@@ -73,7 +74,10 @@ function AssetDetailPage() {
   }
 
   const activeAssignment = asset.assignments?.find((a) => a.isActive)
-  const canReturn = activeAssignment && (asset.status === 'assigned' || asset.status === 'acknowledged')
+  const canReturn =
+    activeAssignment &&
+    asset.status !== AssetStatus.AVAILABLE &&
+    asset.status !== AssetStatus.ASSIGNED
   const canDelete = asset.status === 'available'
 
   function handleReturnClick() {
