@@ -17,7 +17,7 @@ import {
   ReviewTicketDialog,
   ConfirmDialog,
 } from '../components/index.js'
-import { formatDate, calculateDuration } from '../utils/datetime.js'
+import { formatDate, calculateAcknowledgedAssignmentDuration } from '../utils/datetime.js'
 import { formatAssetTypeLabel } from '../utils/assetType.js'
 import { toast } from '../utils/toast.js'
 
@@ -183,7 +183,12 @@ function AssetDetailPage() {
     {
       key: 'duration',
       label: 'Duration',
-      render: (_, row) => calculateDuration(row.assignedAt, row.returnedAt),
+      render: (_, row) =>
+        calculateAcknowledgedAssignmentDuration(
+          row.acknowledgedAt,
+          row.returnedAt,
+          row.currentStatus
+        ),
     },
   ]
 

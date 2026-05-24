@@ -1,3 +1,5 @@
+import { AssetStatus } from '../constants/assets.js'
+
 /**
  * Formats a date string to relative time (e.g., "2 hours ago", "3 days ago").
  */
@@ -51,13 +53,13 @@ export function formatEventType(eventType) {
 }
 
 /**
- * Calculates duration between two dates and returns a human-readable string.
+ * Formats the day difference between two dates as a human-readable duration label.
+ *
+ * @param {string|Date} startDate
+ * @param {string|Date} endDate
+ * @returns {string}
  */
-export function calculateDuration(startDate, endDate) {
-  if (!endDate) {
-    return 'Active'
-  }
-
+function formatDayDuration(startDate, endDate) {
   const start = new Date(startDate)
   const end = new Date(endDate)
   const diffInMs = end - start
@@ -70,6 +72,43 @@ export function calculateDuration(startDate, endDate) {
     return '1 day'
   }
   return `${diffInDays} days`
+}
+
+/**
+ * Calculates duration between two dates and returns a human-readable string.
+ */
+export function calculateDuration(startDate, endDate) {
+  if (!endDate) {
+    return 'Active'
+  }
+
+  return formatDayDuration(startDate, endDate)
+}
+
+/**
+ * Calculates assignment duration from acknowledgment until return or today.
+ * Shows an em dash when the assignment is still available/assigned (not acknowledged).
+ *
+ * @param {string|null|undefined} acknowledgedAt
+ * @param {string|null|undefined} returnedAt
+ * @param {string} currentStatus
+ * @returns {string}
+ */
+export function calculateAcknowledgedAssignmentDuration(
+  acknowledgedAt,
+  returnedAt,
+  currentStatus
+) {
+  if (currentStatus === AssetStatus.AVAILABLE || currentStatus === AssetStatus.ASSIGNED) {
+    return '—'
+  }
+
+  if (!acknowledgedAt) {
+    return '—'
+  }
+
+  const endDate = returnedAt ? returnedAt : new Date().toISOString()
+  return formatDayDuration(acknowledgedAt, endDate)
 }
 
 /**
