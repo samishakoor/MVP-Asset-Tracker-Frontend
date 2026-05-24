@@ -10,6 +10,7 @@ import AssetStatusBadge from '../components/AssetStatusBadge.jsx'
 import TicketStatusBadge from '../components/TicketStatusBadge.jsx'
 import Spinner from '../components/Spinner.jsx'
 import { formatAssetTypeLabel } from '../utils/assetType.js'
+import { formatDate } from '../utils/datetime.js'
 
 const CONDITION_LABELS = {
   new: 'New',
@@ -104,11 +105,15 @@ function EmployeeAssetDetailPage() {
     return null
   }
 
-  const assignedDate = new Date(asset.activeAssignment.assignedAt).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  })
+  const assignedDate = formatDate(asset.activeAssignment.assignedAt)
+  const hasAcknowledged = Boolean(asset.activeAssignment.acknowledgedAt)
+  const acknowledgedDate = hasAcknowledged
+    ? formatDate(asset.activeAssignment.acknowledgedAt)
+    : null
+
+  const infoGridClassName = hasAcknowledged
+    ? 'grid grid-cols-2 divide-x divide-y divide-slate-100 sm:grid-cols-3 lg:grid-cols-5 sm:divide-y-0 lg:divide-y-0'
+    : 'grid grid-cols-2 divide-x divide-y divide-slate-100 sm:grid-cols-4 sm:divide-y-0'
 
   const canReport = asset.status === AssetStatus.ACKNOWLEDGED
   const isPendingReview = asset.status === AssetStatus.PENDING_REVIEW
@@ -133,7 +138,7 @@ function EmployeeAssetDetailPage() {
 
       {/* Info grid */}
       <div className="mb-6 overflow-hidden rounded-2xl border border-slate-200 bg-white">
-        <div className="grid grid-cols-2 divide-x divide-y divide-slate-100 sm:grid-cols-4 sm:divide-y-0">
+        <div className={infoGridClassName}>
           <InfoCell label="Type">
             <span>{formatAssetTypeLabel(asset.assetType)}</span>
           </InfoCell>
@@ -146,6 +151,11 @@ function EmployeeAssetDetailPage() {
           <InfoCell label="Assigned Since">
             {assignedDate}
           </InfoCell>
+          {hasAcknowledged && (
+            <InfoCell label="Acknowledged Since">
+              {acknowledgedDate}
+            </InfoCell>
+          )}
         </div>
       </div>
 
@@ -216,7 +226,8 @@ function EmployeeAssetDetailPage() {
                 className="flex w-full items-center justify-center gap-2 rounded-xl bg-orange-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-orange-700 disabled:opacity-50 sm:w-auto"
               >
                 <Flag className="h-4 w-4" />
-                {isSubmitting ? 'Submitting…' : 'Flag as Needs Attention'}
+                {isSubmitting ? 'Submitting…' : 'Report Issue'}
+           
               </button>
             </form>
           )}
@@ -271,11 +282,11 @@ function TicketHistoryItem({ ticket }) {
     <li className="px-5 py-4">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0 flex-1">
-          <p className="text-sm text-slate-800">{ticket.description}</p>
+          <p className="text-s text-slate-800">{ticket.description}</p>
           {ticket.adminNotes && (
             <div className="mt-2 rounded-lg bg-slate-50 px-3 py-2">
-              <p className="text-xs font-semibold text-slate-500">Admin Notes</p>
-              <p className="mt-0.5 text-xs text-slate-700">{ticket.adminNotes}</p>
+              <p className="text-sm font-semibold text-slate-800">Admin Notes</p>
+              <p className="mt-0.5 text-s text-slate-800">{ticket.adminNotes}</p>
             </div>
           )}
         </div>
