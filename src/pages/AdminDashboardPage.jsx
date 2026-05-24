@@ -140,7 +140,6 @@ function AdminDashboardPage() {
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="text-lg font-semibold text-slate-900">Recent Activity</h2>
-            <p className="mt-0.5 text-sm text-slate-500">Latest asset events across the organization</p>
           </div>
           <Link
             to={ADMIN_AUDIT_LOGS_PATH}
