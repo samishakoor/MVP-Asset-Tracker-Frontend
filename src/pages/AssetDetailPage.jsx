@@ -78,7 +78,7 @@ function AssetDetailPage() {
     activeAssignment &&
     asset.status !== AssetStatus.AVAILABLE &&
     asset.status !== AssetStatus.ASSIGNED
-  const canDelete = asset.status === 'available'
+  const canDelete = asset.status === AssetStatus.AVAILABLE
 
   function handleReturnClick() {
     setReturnDialogOpen(true)
