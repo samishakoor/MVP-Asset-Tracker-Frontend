@@ -1,6 +1,5 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import {
-  HOME_PAGE_LINK,
   LANDING_PAGE_LINK,
   LOGIN_PAGE_LINK,
   SIGNUP_PAGE_LINK,
@@ -22,12 +21,10 @@ import {
   NOT_FOUND,
 } from './constants/routes.js'
 import { UserRole } from './constants/auth.js'
-import MainLayout from './layouts/MainLayout.jsx'
 import AuthLayout from './layouts/AuthLayout.jsx'
 import AdminLayout from './layouts/AdminLayout.jsx'
 import EmployeeLayout from './layouts/EmployeeLayout.jsx'
 import ProtectedRoute from './components/ProtectedRoute.jsx'
-import HomePage from './pages/HomePage.jsx'
 import LoginPage from './pages/LoginPage.jsx'
 import SignupPage from './pages/SignupPage.jsx'
 import ForgotPasswordPage from './pages/ForgotPasswordPage.jsx'
@@ -48,6 +45,11 @@ import NotFoundPage from './pages/NotFoundPage.jsx'
 
 export const AppRouter = () => (
   <Routes>
+    {/* Root — default entry redirects to login */}
+    <Route path={LANDING_PAGE_LINK} element={<Navigate to={LOGIN_PAGE_LINK} replace />} />
+    {/* Legacy /home — redirect to login */}
+    <Route path="home" element={<Navigate to={LOGIN_PAGE_LINK} replace />} />
+
     {/* Auth — login and signup for admins and employees */}
     <Route element={<AuthLayout />}>
       <Route path={LOGIN_PAGE_LINK} element={<LoginPage />} />
@@ -102,12 +104,6 @@ export const AppRouter = () => (
       <Route path={EMPLOYEE_ASSET_DETAIL_LINK} element={<EmployeeAssetDetailPage />} />
       {/* History — read-only list of previously returned assets */}
       <Route path={EMPLOYEE_HISTORY_LINK} element={<EmployeeHistoryPage />} />
-    </Route>
-
-    {/* Main layout — public app shell with header and nested pages */}
-    <Route path={LANDING_PAGE_LINK} element={<MainLayout />}>
-      <Route index element={<Navigate to={HOME_PAGE_LINK} replace />} />
-      <Route path={HOME_PAGE_LINK} element={<HomePage />} />
     </Route>
 
     {/* Catch-all — 404 page for unknown paths */}

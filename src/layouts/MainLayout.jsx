@@ -4,7 +4,6 @@ import { Menu, X } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth.js'
 import BrandLogo from '../components/BrandLogo.jsx'
 import {
-  HOME_PAGE_PATH,
   LOGIN_PAGE_LINK,
   SIGNUP_PAGE_LINK,
   ADMIN_DASHBOARD_PATH,
@@ -36,7 +35,7 @@ function MainLayout() {
       {/* ── Header ── */}
       <header className="sticky top-0 z-40 border-b border-slate-200 bg-white">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-          <BrandLogo to={HOME_PAGE_PATH} variant="emerald" size="md" onClick={closeDrawer} />
+          <BrandLogo to={LOGIN_PAGE_LINK} variant="emerald" size="md" onClick={closeDrawer} />
 
           {/* Desktop nav */}
           <nav className="hidden items-center gap-2 sm:flex">

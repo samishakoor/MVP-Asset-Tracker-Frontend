@@ -1,6 +1,4 @@
 export const LANDING_PAGE_LINK = '/'
-export const HOME_PAGE_LINK = 'home'
-export const HOME_PAGE_PATH = '/home'
 export const LOGIN_PAGE_LINK = '/login'
 export const SIGNUP_PAGE_LINK = '/signup'
 export const FORGOT_PASSWORD_PAGE_LINK = '/forgot-password'

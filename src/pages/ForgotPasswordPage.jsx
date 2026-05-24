@@ -1,8 +1,18 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { Mail } from 'lucide-react'
 import { usePasswordReset } from '../hooks/usePasswordReset.js'
+import AuthCard from '../components/AuthCard.jsx'
+import AuthFormAlert from '../components/AuthFormAlert.jsx'
+import AuthTextField from '../components/AuthTextField.jsx'
 import { LOGIN_PAGE_LINK } from '../constants/routes.js'
 import { toast } from '../utils/toast.js'
+
+const PRIMARY_BUTTON_CLASS =
+  'w-full rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white shadow-sm shadow-emerald-600/25 transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60'
+
+const SECONDARY_BUTTON_CLASS =
+  'w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-60'
 
 /**
  * Forgot-password screen — collects email and sends a reset link.
@@ -63,84 +73,77 @@ function ForgotPasswordPage() {
 
   if (emailSent) {
     return (
-      <div className="w-full rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-        <h1 className="text-2xl font-semibold text-slate-900">Check your email</h1>
-        <p className="mt-2 text-sm text-slate-600">
-          We sent a password reset link to{' '}
-          <span className="font-medium text-slate-800">{email}</span>. The link expires in 1 hour.
-        </p>
-
-        <div className="mt-6 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
-          Did not receive the email? Check your spam folder or wait for the timer to resend.
-        </div>
+      <AuthCard
+        title="Check your email"
+        subtitle={
+          <>
+            A password reset link has been sent to{' '}
+            <span className="font-semibold text-slate-800">{email}</span>. Open the email and
+            follow the link to choose a new password.
+          </>
+        }
+        badge={<Mail className="h-5 w-5" aria-hidden="true" />}
+      >
+        <AuthFormAlert variant="info">
+          Did not receive the email? Check your spam folder or use the resend option below once the
+          timer expires.
+        </AuthFormAlert>
 
         <div className="mt-6 space-y-3">
           {secondsRemaining > 0 ? (
-            <p className="text-center text-sm text-slate-600">
+            <p className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-center text-sm text-slate-600">
               Resend available in{' '}
-              <span className="font-medium text-slate-900">{secondsRemaining}s</span>
+              <span className="font-semibold tabular-nums text-slate-900">{secondsRemaining}s</span>
             </p>
           ) : (
             <button
               type="button"
               onClick={handleResendClick}
               disabled={isSubmitting}
-              className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+              className={SECONDARY_BUTTON_CLASS}
             >
               {isSubmitting ? 'Sending...' : 'Resend email'}
             </button>
           )}
 
-          <Link
-            to={LOGIN_PAGE_LINK}
-            className="block w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-center text-sm font-medium text-white hover:bg-emerald-700"
-          >
+          <Link to={LOGIN_PAGE_LINK} className={`block text-center ${PRIMARY_BUTTON_CLASS}`}>
             Back to sign in
           </Link>
         </div>
-      </div>
+      </AuthCard>
     )
   }
 
   return (
-    <div className="w-full rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-      <h1 className="text-2xl font-semibold text-slate-900">Forgot password</h1>
-      <p className="mt-2 text-sm text-slate-600">
-        Enter your email and we will send you a link to reset your password.
-      </p>
+    <AuthCard
+      title="Forgot password"
+      subtitle="Enter the email associated with your account and we will send you a secure reset link."
+      badge={<Mail className="h-5 w-5" aria-hidden="true" />}
+      footer={
+        <p className="text-sm text-slate-600">
+          Remember your password?{' '}
+          <Link to={LOGIN_PAGE_LINK} className="font-semibold text-emerald-600 hover:text-emerald-700">
+            Sign in
+          </Link>
+        </p>
+      }
+    >
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <AuthTextField
+          id="forgot-email"
+          label="Email"
+          type="email"
+          autoComplete="email"
+          required={true}
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+        />
 
-      <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-        <div>
-          <label htmlFor="forgot-email" className="block text-sm font-medium text-slate-700">
-            Email
-          </label>
-          <input
-            id="forgot-email"
-            type="email"
-            autoComplete="email"
-            required
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-          />
-        </div>
-
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {isSubmitting ? 'Sending reset link...' : 'Send reset link'}
+        <button type="submit" disabled={isSubmitting} className={PRIMARY_BUTTON_CLASS}>
+          {isSubmitting ? 'Sending reset email...' : 'Send reset link'}
         </button>
       </form>
-
-      <p className="mt-6 text-center text-sm text-slate-600">
-        Remember your password?{' '}
-        <Link to={LOGIN_PAGE_LINK} className="font-medium text-emerald-600 hover:text-emerald-700">
-          Sign in
-        </Link>
-      </p>
-    </div>
+    </AuthCard>
   )
 }
 

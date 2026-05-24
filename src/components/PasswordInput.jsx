@@ -26,7 +26,7 @@ function PasswordInput({
       <label htmlFor={id} className="block text-sm font-medium text-slate-700">
         {label}
       </label>
-      <div className="relative mt-1">
+      <div className="relative mt-1.5">
         <input
           id={id}
           type={showPassword ? 'text' : 'password'}
@@ -35,7 +35,7 @@ function PasswordInput({
           minLength={minLength}
           value={value}
           onChange={onChange}
-          className="w-full rounded-lg border border-slate-300 py-2 pl-3 pr-10 text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+          className="w-full rounded-xl border border-slate-200 bg-slate-50/60 py-3 pl-4 pr-10 text-sm text-slate-900 shadow-sm transition focus:border-emerald-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
         />
         <button
           type="button"
@@ -50,7 +50,7 @@ function PasswordInput({
           )}
         </button>
       </div>
-      {hint ? <p className="mt-1 text-xs text-slate-500">{hint}</p> : null}
+      {hint ? <p className="mt-1.5 text-xs text-slate-500">{hint}</p> : null}
     </div>
   )
 }

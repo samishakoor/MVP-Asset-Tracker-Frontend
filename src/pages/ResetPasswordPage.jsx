@@ -1,8 +1,14 @@
 import { useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { KeyRound, Link2Off } from 'lucide-react'
 import PasswordInput from '../components/PasswordInput.jsx'
+import AuthCard from '../components/AuthCard.jsx'
+import AuthFormAlert from '../components/AuthFormAlert.jsx'
 import { usePasswordReset } from '../hooks/usePasswordReset.js'
 import { LOGIN_PAGE_LINK, FORGOT_PASSWORD_PAGE_LINK } from '../constants/routes.js'
+
+const PRIMARY_BUTTON_CLASS =
+  'w-full rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white shadow-sm shadow-emerald-600/25 transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60'
 
 /**
  * Reset-password screen — sets a new password using the token from the reset email.
@@ -44,32 +50,31 @@ function ResetPasswordPage() {
 
   if (!token) {
     return (
-      <div className="w-full rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-        <h1 className="text-2xl font-semibold text-slate-900">Invalid reset link</h1>
-        <p className="mt-2 text-sm text-slate-600">
-          This password reset link is missing or invalid. Request a new link to continue.
-        </p>
-        <Link
-          to={FORGOT_PASSWORD_PAGE_LINK}
-          className="mt-6 block w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-center text-sm font-medium text-white hover:bg-emerald-700"
-        >
+      <AuthCard
+        title="Invalid reset link"
+        subtitle="This password reset link is missing or invalid. Request a new link to continue."
+        badge={<Link2Off className="h-5 w-5" aria-hidden="true" />}
+      >
+        <Link to={FORGOT_PASSWORD_PAGE_LINK} className={`block text-center ${PRIMARY_BUTTON_CLASS}`}>
           Request new link
         </Link>
-      </div>
+      </AuthCard>
     )
   }
 
   return (
-    <div className="w-full rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-      <h1 className="text-2xl font-semibold text-slate-900">Reset password</h1>
-      <p className="mt-2 text-sm text-slate-600">Choose a new password for your account.</p>
-
-      <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-        {error ? (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-            {error}
-          </div>
-        ) : null}
+    <AuthCard
+      title="Reset password"
+      subtitle="Choose a strong new password for your AssetTrack account."
+      badge={<KeyRound className="h-5 w-5" aria-hidden="true" />}
+      footer={
+        <Link to={LOGIN_PAGE_LINK} className="text-sm font-semibold text-emerald-600 hover:text-emerald-700">
+          Back to sign in
+        </Link>
+      }
+    >
+      <form onSubmit={handleSubmit} className="space-y-5">
+        {error ? <AuthFormAlert variant="error">{error}</AuthFormAlert> : null}
 
         <PasswordInput
           id="reset-password"
@@ -92,21 +97,11 @@ function ResetPasswordPage() {
           minLength={8}
         />
 
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
-        >
+        <button type="submit" disabled={isSubmitting} className={PRIMARY_BUTTON_CLASS}>
           {isSubmitting ? 'Resetting password...' : 'Reset password'}
         </button>
       </form>
-
-      <p className="mt-6 text-center text-sm text-slate-600">
-        <Link to={LOGIN_PAGE_LINK} className="font-medium text-emerald-600 hover:text-emerald-700">
-          Back to sign in
-        </Link>
-      </p>
-    </div>
+    </AuthCard>
   )
 }
 
