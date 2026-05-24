@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
-import { ArrowLeft, Package } from 'lucide-react'
+import { useParams, Link, useNavigate } from 'react-router-dom'
+import { ArrowLeft, Package, Trash2 } from 'lucide-react'
 import { ADMIN_ASSETS_PATH } from '../constants/routes.js'
 import { useAsset } from '../hooks/useAsset.js'
 import { useReturnAsset } from '../hooks/useReturnAsset.js'
 import { useReviewTicket } from '../hooks/useReviewTicket.js'
+import { useDeleteAsset } from '../hooks/useDeleteAsset.js'
 import {
   PageHeader,
   Spinner,
@@ -24,14 +25,17 @@ import { toast } from '../utils/toast.js'
  */
 function AssetDetailPage() {
   const { id } = useParams()
+  const navigate = useNavigate()
   const { asset, isLoading, error, refetch } = useAsset(id)
   const { returnAsset, isReturning } = useReturnAsset()
   const { reviewTicket, isReviewing } = useReviewTicket()
+  const { deleteAsset, isDeleting } = useDeleteAsset()
 
   const [activeTab, setActiveTab] = useState('assignments')
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false)
   const [selectedTicket, setSelectedTicket] = useState(null)
   const [returnDialogOpen, setReturnDialogOpen] = useState(false)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
 
   if (isLoading) {
     return (
@@ -70,6 +74,7 @@ function AssetDetailPage() {
 
   const activeAssignment = asset.assignments?.find((a) => a.isActive)
   const canReturn = activeAssignment && (asset.status === 'assigned' || asset.status === 'acknowledged')
+  const canDelete = asset.status === 'available'
 
   function handleReturnClick() {
     setReturnDialogOpen(true)
@@ -84,6 +89,23 @@ function AssetDetailPage() {
       },
       onError: (err) => {
         toast.error(err.message || 'Failed to return asset')
+      },
+    })
+  }
+
+  function handleDeleteClick() {
+    setDeleteDialogOpen(true)
+  }
+
+  function handleDeleteConfirm() {
+    deleteAsset(id, {
+      onSuccess: () => {
+        toast.success('Asset deleted successfully')
+        navigate(ADMIN_ASSETS_PATH)
+      },
+      onError: (err) => {
+        toast.error(err.message || 'Failed to delete asset')
+        setDeleteDialogOpen(false)
       },
     })
   }
@@ -209,6 +231,17 @@ function AssetDetailPage() {
                   className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   Return Asset
+                </button>
+              )}
+              {canDelete && (
+                <button
+                  type="button"
+                  onClick={handleDeleteClick}
+                  disabled={isDeleting}
+                  className="inline-flex items-center justify-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Delete Asset
                 </button>
               )}
             </div>
@@ -371,6 +404,17 @@ function AssetDetailPage() {
         message={`Are you sure you want to return this asset from ${activeAssignment?.employee?.name}?`}
         confirmLabel="Return Asset"
         confirmingLabel="Returning..."
+      />
+
+      <ConfirmDialog
+        isOpen={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+        onConfirm={handleDeleteConfirm}
+        isConfirming={isDeleting}
+        title="Delete Asset"
+        message="Are you sure you want to delete this asset? This action will permanently delete all associated assignment history and support tickets. This action cannot be undone."
+        confirmLabel="Delete Asset"
+        confirmingLabel="Deleting..."
       />
     </main>
   )

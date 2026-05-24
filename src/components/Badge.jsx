@@ -44,6 +44,10 @@ function Badge({ status }) {
       color: 'bg-slate-100 text-slate-800 ring-1 ring-slate-600/20',
       label: 'Registered',
     },
+    deleted: {
+      color: 'bg-red-100 text-red-800 ring-1 ring-red-600/20',
+      label: 'Deleted',
+    },
     returned: {
       color: 'bg-emerald-100 text-emerald-800 ring-1 ring-emerald-600/20',
       label: 'Returned',

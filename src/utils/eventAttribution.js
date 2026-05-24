@@ -12,6 +12,7 @@ export function getEventAttribution(eventType, triggeredByName, targetEmployeeNa
 
   switch (eventType) {
     case 'registered':
+    case 'deleted':
       // Only "by AdminName"
       segments.push({ preposition: 'by', name: triggeredByName, isBold: true })
       break

@@ -86,15 +86,21 @@ function AssignedAssetCard({ assignment }) {
     navigate(employeeAssetDetailPath(assignment.assetId));
   }
 
+  const isPendingAcknowledgment =
+    status === AssetStatus.ASSIGNED && !acknowledged && !hasAcknowledged;
+
   const canViewDetails =
-    status === AssetStatus.ACKNOWLEDGED ||
-    status === AssetStatus.PENDING_REVIEW ||
-    status === AssetStatus.UNDER_REPAIR;
+    !isPendingAcknowledgment &&
+    (acknowledged ||
+      hasAcknowledged ||
+      status === AssetStatus.ACKNOWLEDGED ||
+      status === AssetStatus.PENDING_REVIEW ||
+      status === AssetStatus.UNDER_REPAIR);
 
   return (
     <div className="flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
       {/* Status banner */}
-      {status === AssetStatus.ASSIGNED && !acknowledged && (
+      {isPendingAcknowledgment && (
         <div className="flex items-center gap-2 bg-yellow-50 px-4 py-2.5 text-sm font-medium text-yellow-800">
           <Clock className="h-4 w-4 shrink-0" />
           Pending your acknowledgment
@@ -188,7 +194,7 @@ function AssignedAssetCard({ assignment }) {
 
         {/* Actions */}
         <div className="mt-auto">
-          {status === AssetStatus.ASSIGNED && !acknowledged && (
+          {isPendingAcknowledgment && (
             <button
               type="button"
               onClick={handleAcknowledge}
@@ -198,13 +204,15 @@ function AssignedAssetCard({ assignment }) {
               {isAcknowledging ? "Acknowledging…" : "Acknowledge Asset"}
             </button>
           )}
-          <button
-            type="button"
-            onClick={handleViewDetails}
-            className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50"
-          >
-            View Asset Details
-          </button>
+          {canViewDetails && (
+            <button
+              type="button"
+              onClick={handleViewDetails}
+              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50"
+            >
+              View Asset Details
+            </button>
+          )}
         </div>
       </div>
     </div>

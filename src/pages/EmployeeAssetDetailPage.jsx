@@ -219,12 +219,12 @@ function EmployeeAssetDetailPage() {
                   disabled={isSubmitting}
                   rows={4}
                   minLength={MIN_DESCRIPTION_LENGTH}
-                  maxLength={2000}
+                  maxLength={500}
                   placeholder="Describe the problem in detail…"
                   className="mt-1.5 block w-full resize-none rounded-xl border border-slate-300 px-3 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 disabled:bg-slate-100"
                 />
                 <p className="mt-1 text-right text-xs text-slate-400">
-                  {description.length}/2000
+                  {description.length}/500
                 </p>
               </div>
 

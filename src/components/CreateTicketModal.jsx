@@ -73,12 +73,12 @@ function CreateTicketModal({ isOpen, onClose, assignmentId, onSuccess }) {
                 onChange={handleDescriptionChange}
                 disabled={isSubmitting}
                 rows={5}
-                maxLength={2000}
+                maxLength={500}
                 className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 disabled:bg-slate-100"
                 placeholder="Describe the problem with the asset..."
                 required
               />
-              <p className="mt-1 text-xs text-slate-500">{description.length}/2000 characters</p>
+              <p className="mt-1 text-xs text-slate-500">{description.length}/500 characters</p>
             </div>
           </div>
 

@@ -1,33 +1,31 @@
-import { useCallback, useState } from 'react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { apiRequest } from '../utils/api.js'
 
 /**
- * Deletes an asset via DELETE /assets/:id.
+ * Custom React Query hook for soft-deleting an asset.
+ * Asset must be in available status to be deleted.
+ *
+ * @returns {{ deleteAsset: Function, isDeleting: boolean }}
  */
 export function useDeleteAsset() {
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [error, setError] = useState(null)
+  const queryClient = useQueryClient()
 
-  const deleteAsset = useCallback(async (assetId) => {
-    setIsSubmitting(true)
-    setError(null)
-
-    try {
+  const mutation = useMutation({
+    mutationFn: async (assetId) => {
       const response = await apiRequest(`/assets/${assetId}`, {
         method: 'DELETE',
       })
       return response.data
-    } catch (err) {
-      setError(err)
-      throw err
-    } finally {
-      setIsSubmitting(false)
-    }
-  }, [])
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['assets'] })
+      queryClient.invalidateQueries({ queryKey: ['admin-summary'] })
+      queryClient.invalidateQueries({ queryKey: ['audit-logs'] })
+    },
+  })
 
   return {
-    deleteAsset,
-    isSubmitting,
-    error,
+    deleteAsset: mutation.mutate,
+    isDeleting: mutation.isPending,
   }
 }
