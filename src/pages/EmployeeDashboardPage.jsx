@@ -53,7 +53,7 @@ function EmployeeDashboardPage() {
       />
 
       {assignments.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-white py-16 text-center">
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-white px-4 py-16 text-center sm:px-6">
           <Package className="mb-3 h-10 w-10 text-slate-300" />
           <p className="text-sm font-medium text-slate-600">No assets assigned to you yet.</p>
           <p className="mt-1 text-xs text-slate-400">
