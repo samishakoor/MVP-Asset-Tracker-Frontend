@@ -21,7 +21,7 @@ function AuditEventRow({
   const attribution = getEventAttribution(eventType, triggeredByName, targetEmployeeName)
 
   return (
-    <div className="flex gap-4 p-4 sm:p-6">
+    <div className="flex gap-4 p-3 sm:p-5">
       <div className="flex flex-col items-center">
         <div className="h-3 w-3 shrink-0 rounded-full bg-emerald-500" />
         <div className="w-px flex-1 bg-slate-200" />
@@ -29,22 +29,23 @@ function AuditEventRow({
 
       <div className="min-w-0 flex-1 pb-4">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex min-w-0 flex-wrap items-center gap-2">
-              <Badge status={eventType} />
-              {shouldShowAssetName && (
-                <div className="inline-flex items-center gap-1.5 rounded-md bg-slate-50 px-2.5 py-1 ring-1 ring-slate-200">
-                  <span className="truncate text-sm font-semibold text-slate-700">{assetName}</span>
-                </div>
-              )}
-            </div>
-            
-            <div className="flex shrink-0 items-center gap-1.5 text-xs text-slate-500">
-              <Clock className="h-3.5 w-3.5" />
-              <time className="font-medium">{formatRelativeTime(createdAt)}</time>
-            </div>
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
+            <Badge status={eventType} />
+            {shouldShowAssetName && (
+              <div className="inline-flex items-center gap-1.5 rounded-md bg-slate-50 px-2.5 py-1 ring-1 ring-slate-200">
+                <span className="truncate text-sm font-semibold text-slate-700">{assetName}</span>
+              </div>
+            )}
+          </div>
+          
+          {/* Timestamp - Desktop only (top right) */}
+          <div className="hidden shrink-0 items-center gap-1.5 text-xs text-slate-500 sm:flex">
+            <Clock className="h-3.5 w-3.5" />
+            <time className="font-medium">{formatRelativeTime(createdAt)}</time>
+          </div>
         </div>
 
-        <p className="mt-1 text-sm text-slate-600">
+        <p className="mt-2 text-sm text-slate-600">
           {attribution.segments.map((segment, index) => (
             <span key={index}>
               {segment.preposition}{' '}
@@ -57,6 +58,12 @@ function AuditEventRow({
         </p>
 
         <EventNotesCallout notes={notes} eventType={eventType} />
+
+        {/* Timestamp - Mobile only (bottom) */}
+        <div className="mt-3 flex items-center gap-1.5 text-xs text-slate-500 sm:hidden">
+          <Clock className="h-3.5 w-3.5" />
+          <time className="font-medium">{formatRelativeTime(createdAt)}</time>
+        </div>
       </div>
     </div>
   )

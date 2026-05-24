@@ -14,6 +14,7 @@ import {
   ADMIN_ASSET_EDIT_LINK,
   ADMIN_ASSIGNMENTS_LINK,
   ADMIN_TICKETS_LINK,
+  ADMIN_AUDIT_LOGS_LINK,
   EMPLOYEE_DASHBOARD_PATH,
   EMPLOYEE_ASSIGNMENTS_LINK,
   EMPLOYEE_ASSET_DETAIL_LINK,
@@ -38,6 +39,7 @@ import EditAssetPage from './pages/EditAssetPage.jsx'
 import AssetDetailPage from './pages/AssetDetailPage.jsx'
 import AssignmentsPage from './pages/AssignmentsPage.jsx'
 import TicketsListPage from './pages/TicketsListPage.jsx'
+import AuditLogsPage from './pages/AuditLogsPage.jsx'
 import EmployeeDashboardPage from './pages/EmployeeDashboardPage.jsx'
 import EmployeeAssignmentsPage from './pages/EmployeeAssignmentsPage.jsx'
 import EmployeeAssetDetailPage from './pages/EmployeeAssetDetailPage.jsx'
@@ -88,6 +90,8 @@ export const AppRouter = () => (
       <Route path={ADMIN_ASSIGNMENTS_LINK} element={<AssignmentsPage />} />
       {/* Support tickets — admin reviews employee-reported issues */}
       <Route path={ADMIN_TICKETS_LINK} element={<TicketsListPage />} />
+      {/* Audit logs — complete history of all asset-related events */}
+      <Route path={ADMIN_AUDIT_LOGS_LINK} element={<AuditLogsPage />} />
     </Route>
 
     {/* Employee — assigned assets and support requests (employee role only) */}

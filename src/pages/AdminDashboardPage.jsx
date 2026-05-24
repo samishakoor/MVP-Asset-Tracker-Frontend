@@ -1,10 +1,12 @@
-import { Package, CheckCircle, Users, Wrench, AlertCircle } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { Package, CheckCircle, Users, Wrench, AlertCircle, ArrowRight } from 'lucide-react'
 import { useAdminSummary } from '../hooks/useAdminSummary.js'
 import { PageHeader, Spinner, Table } from '../components/index.js'
 import AuditEventRow from '../components/AuditEventRow.jsx'
+import { ADMIN_AUDIT_LOGS_PATH } from '../constants/routes.js'
 
 /**
- * Admin dashboard with summary stats, assets per employee table, and recent events timeline.
+ * Admin dashboard with summary stats, assets per employee table, and recent activity preview.
  * Rendered at /admin/dashboard inside AdminLayout (admin role only).
  */
 function AdminDashboardPage() {
@@ -92,6 +94,7 @@ function AdminDashboardPage() {
   ]
 
   const formattedEmployeeData = summary.assets_per_employee ?? []
+  const recentEvents = summary.recent_events ?? []
 
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
@@ -132,13 +135,26 @@ function AdminDashboardPage() {
         )}
       </section>
 
-      {/* Recent Events Timeline */}
+      {/* Recent Activity — latest 5 events with link to full audit logs */}
       <section>
-        <h2 className="mb-4 text-lg font-semibold text-slate-900">Recent Events</h2>
-        {summary.recent_events && summary.recent_events.length > 0 ? (
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-slate-900">Recent Activity</h2>
+            <p className="mt-0.5 text-sm text-slate-500">Latest asset events across the organization</p>
+          </div>
+          <Link
+            to={ADMIN_AUDIT_LOGS_PATH}
+            className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-100 sm:w-auto"
+          >
+            View all audit logs
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+
+        {recentEvents.length > 0 ? (
           <div className="rounded-lg border border-slate-200 bg-white shadow-sm">
             <div className="divide-y divide-slate-200">
-              {summary.recent_events.map((event) => (
+              {recentEvents.map((event) => (
                 <AuditEventRow
                   key={event.id}
                   eventType={event.event_type}
@@ -156,6 +172,13 @@ function AdminDashboardPage() {
         ) : (
           <div className="rounded-lg border border-slate-200 bg-slate-50 p-8 text-center">
             <p className="text-sm text-slate-500">No recent events</p>
+            <Link
+              to={ADMIN_AUDIT_LOGS_PATH}
+              className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-emerald-700 hover:text-emerald-800"
+            >
+              Go to audit logs
+              <ArrowRight className="h-4 w-4" />
+            </Link>
           </div>
         )}
       </section>

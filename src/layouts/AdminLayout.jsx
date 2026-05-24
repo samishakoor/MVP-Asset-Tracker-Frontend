@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, Package, Users, AlertCircle, Menu, X } from 'lucide-react'
+import { LayoutDashboard, Package, Users, AlertCircle, FileText, Menu, X } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth.js'
 import BrandLogo from '../components/BrandLogo.jsx'
 import {
@@ -8,6 +8,7 @@ import {
   ADMIN_ASSETS_PATH,
   ADMIN_ASSIGNMENTS_PATH,
   ADMIN_TICKETS_PATH,
+  ADMIN_AUDIT_LOGS_PATH,
 } from '../constants/routes.js'
 
 /**
@@ -50,6 +51,11 @@ function AdminLayout() {
       to: ADMIN_TICKETS_PATH,
       icon: AlertCircle,
       label: 'Support Tickets',
+    },
+    {
+      to: ADMIN_AUDIT_LOGS_PATH,
+      icon: FileText,
+      label: 'Audit Logs',
     },
   ]
 
