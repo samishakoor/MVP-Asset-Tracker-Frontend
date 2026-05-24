@@ -40,8 +40,9 @@ const STATUS_LABELS = {
  * Displays asset details (name, type, condition, serial, status, date) and
  * status-aware banners and action buttons:
  *   - ASSIGNED      → yellow "pending" banner + "Acknowledge Asset" button
- *   - ACKNOWLEDGED  → "Report an Issue" button (navigates to asset detail)
- *   - PENDING_REVIEW → orange "under IT review" banner
+ *   - ACKNOWLEDGED  → clickable asset name + "Report an Issue" button (navigates to asset detail)
+ *   - PENDING_REVIEW → clickable asset name + "View Asset Details" button
+ *   - UNDER_REPAIR   → clickable asset name + "View Asset Details" button
  *
  * Props:
  *   assignment — assignment object from GET /users/me/assets
@@ -80,6 +81,15 @@ function AssignedAssetCard({ assignment }) {
     navigate(employeeAssetDetailPath(assignment.assetId))
   }
 
+  function handleViewDetails() {
+    navigate(employeeAssetDetailPath(assignment.assetId))
+  }
+
+  const canViewDetails =
+    status === AssetStatus.ACKNOWLEDGED ||
+    status === AssetStatus.PENDING_REVIEW ||
+    status === AssetStatus.UNDER_REPAIR
+
   return (
     <div className="flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
       {/* Status banner */}
@@ -112,7 +122,17 @@ function AssignedAssetCard({ assignment }) {
       <div className="flex flex-1 flex-col p-5">
         {/* Header row */}
         <div className="mb-3 flex items-start justify-between gap-3">
-          <h3 className="text-lg font-bold leading-snug text-slate-900">{assetName}</h3>
+          {canViewDetails ? (
+            <button
+              type="button"
+              onClick={handleViewDetails}
+              className="text-left text-lg font-bold leading-snug text-slate-900 transition-colors hover:text-emerald-700"
+            >
+              {assetName}
+            </button>
+          ) : (
+            <h3 className="text-lg font-bold leading-snug text-slate-900">{assetName}</h3>
+          )}
           <span
             className={`mt-0.5 shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${statusClass}`}
           >
@@ -181,6 +201,15 @@ function AssignedAssetCard({ assignment }) {
               className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50"
             >
               Report an Issue
+            </button>
+          )}
+          {(status === AssetStatus.PENDING_REVIEW || status === AssetStatus.UNDER_REPAIR) && (
+            <button
+              type="button"
+              onClick={handleViewDetails}
+              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50"
+            >
+              View Asset Details
             </button>
           )}
         </div>

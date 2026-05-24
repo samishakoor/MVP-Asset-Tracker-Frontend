@@ -22,6 +22,8 @@ export const EMPLOYEE_ASSIGNMENTS_LINK = 'assignments'
 export const EMPLOYEE_ASSIGNMENTS_PATH = '/employee/dashboard/assignments'
 export const EMPLOYEE_HISTORY_LINK = 'history'
 export const EMPLOYEE_HISTORY_PATH = '/employee/dashboard/history'
+export const EMPLOYEE_NOTIFICATIONS_LINK = 'notifications'
+export const EMPLOYEE_NOTIFICATIONS_PATH = '/employee/dashboard/notifications'
 export const EMPLOYEE_ASSET_DETAIL_LINK = 'assets/:assetId'
 export const EMPLOYEE_ASSET_DETAIL_PATH = '/employee/dashboard/assets/:assetId'
 

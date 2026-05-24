@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
-import { Monitor, History, Menu, X } from 'lucide-react'
+import { Monitor, History, Bell, Menu, X } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth.js'
+import { useNotifications } from '../hooks/useNotifications.js'
 import BrandLogo from '../components/BrandLogo.jsx'
-import { EMPLOYEE_DASHBOARD_PATH, EMPLOYEE_HISTORY_PATH } from '../constants/routes.js'
+import { EMPLOYEE_DASHBOARD_PATH, EMPLOYEE_HISTORY_PATH, EMPLOYEE_NOTIFICATIONS_PATH } from '../constants/routes.js'
 
 /**
  * Employee layout with sidebar navigation.
@@ -15,6 +16,7 @@ function EmployeeLayout() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const { unreadCount } = useNotifications()
 
   function handleLogout() {
     logout()
@@ -36,6 +38,12 @@ function EmployeeLayout() {
       to: EMPLOYEE_HISTORY_PATH,
       icon: History,
       label: 'My History',
+    },
+    {
+      to: EMPLOYEE_NOTIFICATIONS_PATH,
+      icon: Bell,
+      label: 'Notifications',
+      badge: unreadCount,
     },
   ]
 
@@ -92,7 +100,12 @@ function EmployeeLayout() {
                 }
               >
                 <Icon className="h-5 w-5" />
-                {link.label}
+                <span className="flex-1">{link.label}</span>
+                {link.badge > 0 && (
+                  <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-emerald-600 px-1.5 text-xs font-bold text-white">
+                    {link.badge > 99 ? '99+' : link.badge}
+                  </span>
+                )}
               </NavLink>
             )
           })}

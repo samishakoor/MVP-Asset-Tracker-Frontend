@@ -18,6 +18,7 @@ import {
   EMPLOYEE_ASSIGNMENTS_LINK,
   EMPLOYEE_ASSET_DETAIL_LINK,
   EMPLOYEE_HISTORY_LINK,
+  EMPLOYEE_NOTIFICATIONS_LINK,
   NOT_FOUND,
 } from './constants/routes.js'
 import { UserRole } from './constants/auth.js'
@@ -41,6 +42,7 @@ import EmployeeDashboardPage from './pages/EmployeeDashboardPage.jsx'
 import EmployeeAssignmentsPage from './pages/EmployeeAssignmentsPage.jsx'
 import EmployeeAssetDetailPage from './pages/EmployeeAssetDetailPage.jsx'
 import EmployeeHistoryPage from './pages/EmployeeHistoryPage.jsx'
+import NotificationsPage from './pages/NotificationsPage.jsx'
 import NotFoundPage from './pages/NotFoundPage.jsx'
 
 export const AppRouter = () => (
@@ -104,6 +106,8 @@ export const AppRouter = () => (
       <Route path={EMPLOYEE_ASSET_DETAIL_LINK} element={<EmployeeAssetDetailPage />} />
       {/* History — read-only list of previously returned assets */}
       <Route path={EMPLOYEE_HISTORY_LINK} element={<EmployeeHistoryPage />} />
+      {/* Notifications — asset-related activity notifications for the employee */}
+      <Route path={EMPLOYEE_NOTIFICATIONS_LINK} element={<NotificationsPage />} />
     </Route>
 
     {/* Catch-all — 404 page for unknown paths */}

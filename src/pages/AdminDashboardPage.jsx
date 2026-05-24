@@ -76,9 +76,22 @@ function AdminDashboardPage() {
   ]
 
   const employeeColumns = [
-    { key: 'name', label: 'Employee Name' },
+    { 
+      key: 'name', 
+      label: 'Employee Name',
+      render: (value, row) => (
+        <div>
+          <span className="font-medium text-slate-900">{row.name}</span>
+          {row.email && (
+            <span className="ml-1.5 text-sm text-slate-500">({row.email})</span>
+          )}
+        </div>
+      ),
+    },
     { key: 'asset_count', label: 'Asset Count' },
   ]
+
+  const formattedEmployeeData = summary.assets_per_employee ?? []
 
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
@@ -110,8 +123,8 @@ function AdminDashboardPage() {
       {/* Assets per Employee Table */}
       <section className="mb-8">
         <h2 className="mb-4 text-lg font-semibold text-slate-900">Assets per Employee</h2>
-        {summary.assets_per_employee && summary.assets_per_employee.length > 0 ? (
-          <Table columns={employeeColumns} data={summary.assets_per_employee} />
+        {formattedEmployeeData.length > 0 ? (
+          <Table columns={employeeColumns} data={formattedEmployeeData} />
         ) : (
           <div className="rounded-lg border border-slate-200 bg-slate-50 p-8 text-center">
             <p className="text-sm text-slate-500">No active assignments</p>

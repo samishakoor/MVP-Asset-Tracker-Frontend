@@ -117,6 +117,7 @@ function EmployeeAssetDetailPage() {
 
   const canReport = asset.status === AssetStatus.ACKNOWLEDGED
   const isPendingReview = asset.status === AssetStatus.PENDING_REVIEW
+  const isUnderRepair = asset.status === AssetStatus.UNDER_REPAIR
 
   return (
     <div className="px-4 py-6 sm:px-6 sm:py-8">
@@ -173,7 +174,14 @@ function EmployeeAssetDetailPage() {
             </div>
           )}
 
-          {!canReport && !isPendingReview && (
+          {isUnderRepair && (
+            <div className="flex items-start gap-3 rounded-xl border border-purple-200 bg-purple-50 p-4 text-sm text-purple-800">
+              <Info className="mt-0.5 h-4 w-4 shrink-0" />
+              <p>This asset is currently under repair. Issue reporting is unavailable until repair is complete.</p>
+            </div>
+          )}
+
+          {!canReport && !isPendingReview && !isUnderRepair && (
             <p className="text-sm text-slate-500">
               Reporting is available once you have acknowledged the asset.
             </p>
@@ -216,7 +224,7 @@ function EmployeeAssetDetailPage() {
                   className="mt-1.5 block w-full resize-none rounded-xl border border-slate-300 px-3 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 disabled:bg-slate-100"
                 />
                 <p className="mt-1 text-right text-xs text-slate-400">
-                  {description.trim().length}/{MIN_DESCRIPTION_LENGTH} min · {description.length}/2000
+                  {description.length}/2000
                 </p>
               </div>
 
