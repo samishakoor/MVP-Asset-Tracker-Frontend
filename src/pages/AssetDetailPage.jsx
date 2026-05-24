@@ -5,6 +5,7 @@ import { ADMIN_ASSETS_PATH } from '../constants/routes.js'
 import { AssetStatus } from '../constants/assets.js'
 import { useAsset } from '../hooks/useAsset.js'
 import { useReturnAsset } from '../hooks/useReturnAsset.js'
+import { useCancelAssignment } from '../hooks/useCancelAssignment.js'
 import { useReviewTicket } from '../hooks/useReviewTicket.js'
 import { useDeleteAsset } from '../hooks/useDeleteAsset.js'
 import {
@@ -29,6 +30,7 @@ function AssetDetailPage() {
   const navigate = useNavigate()
   const { asset, isLoading, error, refetch } = useAsset(id)
   const { returnAsset, isReturning } = useReturnAsset()
+  const { cancelAssignment, isCancelling } = useCancelAssignment()
   const { reviewTicket, isReviewing } = useReviewTicket()
   const { deleteAsset, isDeleting } = useDeleteAsset()
 
@@ -36,6 +38,7 @@ function AssetDetailPage() {
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false)
   const [selectedTicket, setSelectedTicket] = useState(null)
   const [returnDialogOpen, setReturnDialogOpen] = useState(false)
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
 
   if (isLoading) {
@@ -78,6 +81,7 @@ function AssetDetailPage() {
     activeAssignment &&
     asset.status !== AssetStatus.AVAILABLE &&
     asset.status !== AssetStatus.ASSIGNED
+  const canCancel = activeAssignment && asset.status === AssetStatus.ASSIGNED
   const canDelete = asset.status === AssetStatus.AVAILABLE
 
   function handleReturnClick() {
@@ -93,6 +97,23 @@ function AssetDetailPage() {
       },
       onError: (err) => {
         toast.error(err.message || 'Failed to return asset')
+      },
+    })
+  }
+
+  function handleCancelClick() {
+    setCancelDialogOpen(true)
+  }
+
+  function handleCancelConfirm() {
+    cancelAssignment(activeAssignment.id, {
+      onSuccess: () => {
+        toast.success('Assignment cancelled successfully')
+        refetch()
+        setCancelDialogOpen(false)
+      },
+      onError: (err) => {
+        toast.error(err.message || 'Failed to cancel assignment')
       },
     })
   }
@@ -227,6 +248,16 @@ function AssetDetailPage() {
           subtitle={`Serial: ${asset.serialNumber}`}
           action={
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              {canCancel && (
+                <button
+                  type="button"
+                  onClick={handleCancelClick}
+                  disabled={isCancelling}
+                  className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-medium text-amber-800 transition-colors hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  Cancel Asset Assignment
+                </button>
+              )}
               {canReturn && (
                 <button
                   type="button"
@@ -408,6 +439,17 @@ function AssetDetailPage() {
         message={`Are you sure you want to return this asset from ${activeAssignment?.employee?.name}?`}
         confirmLabel="Return Asset"
         confirmingLabel="Returning..."
+      />
+
+      <ConfirmDialog
+        isOpen={cancelDialogOpen}
+        onClose={() => setCancelDialogOpen(false)}
+        onConfirm={handleCancelConfirm}
+        isConfirming={isCancelling}
+        title="Cancel Asset Assignment"
+        message={`Cancel this assignment to ${activeAssignment?.employee?.name}? The asset will become available again because the employee has not acknowledged it yet.`}
+        confirmLabel="Cancel Assignment"
+        confirmingLabel="Cancelling..."
       />
 
       <ConfirmDialog

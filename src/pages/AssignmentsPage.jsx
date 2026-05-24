@@ -4,6 +4,7 @@ import { useAssets } from '../hooks/useAssets.js'
 import { useEmployees } from '../hooks/useEmployees.js'
 import { useAssignAsset } from '../hooks/useAssignAsset.js'
 import { useReturnAsset } from '../hooks/useReturnAsset.js'
+import { useCancelAssignment } from '../hooks/useCancelAssignment.js'
 import { PageHeader, Spinner, Table, ConfirmDialog } from '../components/index.js'
 import { formatDate } from '../utils/datetime.js'
 import { AssetStatus } from '../constants/assets.js'
@@ -21,6 +22,7 @@ function AssignmentsPage() {
   )
   const [formError, setFormError] = useState(null)
   const [returnDialogOpen, setReturnDialogOpen] = useState(false)
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false)
   const [selectedAssignment, setSelectedAssignment] = useState(null)
 
   const { assets: availableAssets, isLoading: assetsLoading } = useAssets({
@@ -32,6 +34,7 @@ function AssignmentsPage() {
   const { employees, isLoading: employeesLoading } = useEmployees()
   const { assignAsset, isSubmitting } = useAssignAsset()
   const { returnAsset, isReturning } = useReturnAsset()
+  const { cancelAssignment, isCancelling } = useCancelAssignment()
 
   function handleSubmit(event) {
     event.preventDefault()
@@ -68,6 +71,11 @@ function AssignmentsPage() {
     setReturnDialogOpen(true)
   }
 
+  function handleCancelClick(assignment) {
+    setSelectedAssignment(assignment)
+    setCancelDialogOpen(true)
+  }
+
   function handleReturnConfirm() {
     if (!selectedAssignment) return
 
@@ -80,6 +88,22 @@ function AssignmentsPage() {
       },
       onError: (err) => {
         toast.error(err.message || 'Failed to return asset')
+      },
+    })
+  }
+
+  function handleCancelConfirm() {
+    if (!selectedAssignment) return
+
+    cancelAssignment(selectedAssignment.currentAssignment.id, {
+      onSuccess: () => {
+        toast.success('Assignment cancelled successfully')
+        refetchAssigned()
+        setCancelDialogOpen(false)
+        setSelectedAssignment(null)
+      },
+      onError: (err) => {
+        toast.error(err.message || 'Failed to cancel assignment')
       },
     })
   }
@@ -117,22 +141,35 @@ function AssignmentsPage() {
       key: 'actions',
       label: 'Actions',
       render: (_, row) => {
+        const canCancel = row.status === AssetStatus.ASSIGNED
         const canReturn =
           row.status !== AssetStatus.AVAILABLE && row.status !== AssetStatus.ASSIGNED
 
-        if (!canReturn) {
-          return <span className="text-sm font-medium text-slate-600">—</span>
+        if (canCancel) {
+          return (
+            <button
+              type="button"
+              onClick={() => handleCancelClick(row)}
+              className="rounded-lg bg-amber-100 px-3 py-1.5 text-sm font-medium text-amber-800 transition-colors hover:bg-amber-200"
+            >
+              Cancel
+            </button>
+          )
         }
 
-        return (
-          <button
-            type="button"
-            onClick={() => handleReturnClick(row)}
-            className="rounded-lg bg-red-100 px-3 py-1.5 text-sm font-medium text-red-700 transition-colors hover:bg-red-200"
-          >
-            Return
-          </button>
-        )
+        if (canReturn) {
+          return (
+            <button
+              type="button"
+              onClick={() => handleReturnClick(row)}
+              className="rounded-lg bg-red-100 px-3 py-1.5 text-sm font-medium text-red-700 transition-colors hover:bg-red-200"
+            >
+              Return
+            </button>
+          )
+        }
+
+        return <span className="text-sm text-slate-400">—</span>
       },
     },
   ]
@@ -254,6 +291,20 @@ function AssignmentsPage() {
         message={`Are you sure you want to return ${selectedAssignment?.assetName} from ${selectedAssignment?.employeeName}?`}
         confirmLabel="Return Asset"
         confirmingLabel="Returning..."
+      />
+
+      <ConfirmDialog
+        isOpen={cancelDialogOpen}
+        onClose={() => {
+          setCancelDialogOpen(false)
+          setSelectedAssignment(null)
+        }}
+        onConfirm={handleCancelConfirm}
+        isConfirming={isCancelling}
+        title="Cancel Asset Assignment"
+        message={`Cancel the assignment of ${selectedAssignment?.assetName} to ${selectedAssignment?.employeeName}? The asset will become available again because the employee has not acknowledged it yet.`}
+        confirmLabel="Cancel Assignment"
+        confirmingLabel="Cancelling..."
       />
     </main>
   )

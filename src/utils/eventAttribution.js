@@ -18,6 +18,7 @@ export function getEventAttribution(eventType, triggeredByName, targetEmployeeNa
       break
 
     case 'assigned':
+    case 'assignment_cancelled':
       // "to EmployeeName by AdminName"
       if (targetEmployeeName) {
         segments.push({ preposition: 'to', name: targetEmployeeName, isBold: true })

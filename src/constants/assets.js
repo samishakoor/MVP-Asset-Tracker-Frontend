@@ -28,6 +28,8 @@ export const EventType = {
   TICKET_OPENED: 'ticket_opened',
   REPAIR_STARTED: 'repair_started',
   REPAIR_COMPLETED: 'repair_completed',
+  DELETED: 'deleted',
+  ASSIGNMENT_CANCELLED: 'assignment_cancelled',
 };
 
 export const ASSET_TYPE_OPTIONS = [

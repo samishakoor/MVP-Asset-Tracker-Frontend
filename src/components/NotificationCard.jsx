@@ -18,6 +18,7 @@ const NOTIFICATION_ICONS = {
   asset_under_repair: Wrench,
   ticket_resolved: CheckCircle2,
   asset_returned: Package,
+  assignment_cancelled: Package,
 }
 
 const NOTIFICATION_TYPE_LABELS = {
@@ -27,6 +28,7 @@ const NOTIFICATION_TYPE_LABELS = {
   asset_under_repair: 'Repair',
   ticket_resolved: 'Resolved',
   asset_returned: 'Return',
+  assignment_cancelled: 'Cancelled',
 }
 
 const NOTIFICATION_STYLES = {
@@ -59,6 +61,11 @@ const NOTIFICATION_STYLES = {
     icon: 'text-slate-600 bg-slate-100',
     badge: 'bg-slate-50 text-slate-700 ring-slate-600/10',
     accent: 'border-l-slate-400',
+  },
+  assignment_cancelled: {
+    icon: 'text-amber-600 bg-amber-100',
+    badge: 'bg-amber-50 text-amber-700 ring-amber-600/10',
+    accent: 'border-l-amber-500',
   },
 }
 
