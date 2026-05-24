@@ -1,21 +1,32 @@
 import { useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import { Modal } from './index.js'
+import { TICKET_ACTIONS } from '../constants/tickets.js'
 
 /**
  * Modal dialog for reviewing support tickets.
- * Shows action dropdown (start_repair, resolve) and admin notes textarea.
+ * Shows action dropdown (start_repair, resolve) and admin notes when resolving.
  */
 function ReviewTicketDialog({ isOpen, onClose, onConfirm, isReviewing }) {
-  const [action, setAction] = useState('resolve')
+  const [action, setAction] = useState(TICKET_ACTIONS.RESOLVE)
   const [adminNotes, setAdminNotes] = useState('')
 
   function handleConfirm() {
-    onConfirm({ action, adminNotes: adminNotes.trim() || undefined })
+    const notesForSubmit =
+      action === TICKET_ACTIONS.RESOLVE ? adminNotes.trim() || undefined : undefined
+    onConfirm({ action, adminNotes: notesForSubmit })
+  }
+
+  function handleActionChange(event) {
+    const nextAction = event.target.value
+    setAction(nextAction)
+    if (nextAction !== TICKET_ACTIONS.RESOLVE) {
+      setAdminNotes('')
+    }
   }
 
   function handleClose() {
-    setAction('resolve')
+    setAction(TICKET_ACTIONS.RESOLVE)
     setAdminNotes('')
     onClose()
   }
@@ -31,30 +42,31 @@ function ReviewTicketDialog({ isOpen, onClose, onConfirm, isReviewing }) {
           <select
             id="review-action"
             value={action}
-            onChange={(e) => setAction(e.target.value)}
+            onChange={handleActionChange}
             disabled={isReviewing}
             className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-60"
           >
-            <option value="resolve">Resolve</option>
-            <option value="start_repair">Start Repair</option>
+            <option value={TICKET_ACTIONS.RESOLVE}>Resolve</option>
+            <option value={TICKET_ACTIONS.START_REPAIR}>Start Repair</option>
           </select>
         </div>
 
-        {/* Admin Notes */}
-        <div>
-          <label htmlFor="admin-notes" className="block text-sm font-medium text-slate-700">
-            Admin Notes
-          </label>
-          <textarea
-            id="admin-notes"
-            rows={4}
-            value={adminNotes}
-            onChange={(e) => setAdminNotes(e.target.value)}
-            disabled={isReviewing}
-            placeholder="Add any notes about this review..."
-            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-60"
-          />
-        </div>
+        {action === TICKET_ACTIONS.RESOLVE && (
+          <div>
+            <label htmlFor="admin-notes" className="block text-sm font-medium text-slate-700">
+              Admin Notes
+            </label>
+            <textarea
+              id="admin-notes"
+              rows={4}
+              value={adminNotes}
+              onChange={(e) => setAdminNotes(e.target.value)}
+              disabled={isReviewing}
+              placeholder="Add resolution notes for the employee..."
+              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-60"
+            />
+          </div>
+        )}
 
         {/* Buttons */}
         <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">

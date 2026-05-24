@@ -71,7 +71,6 @@ function TicketsListPage() {
     <div className="px-4 py-6 sm:px-6 sm:py-8">
       <PageHeader
         title="Support Tickets"
-        subtitle={`${tickets.length} ticket${tickets.length !== 1 ? 's' : ''} total`}
       />
 
       {/* Filter tabs */}

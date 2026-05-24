@@ -29,7 +29,7 @@ const STATUS_STYLES = {
 }
 
 const STATUS_LABELS = {
-  assigned: 'Awaiting Ack.',
+  assigned: 'Pending',
   acknowledged: 'Acknowledged',
   pending_review: 'Pending Review',
   under_repair: 'Under Repair',
@@ -39,7 +39,7 @@ const STATUS_LABELS = {
  * Card for a single active asset assignment on the employee dashboard.
  * Displays asset details (name, type, condition, serial, status, date) and
  * status-aware banners and action buttons:
- *   - ASSIGNED      → yellow "pending" banner + "Acknowledge Receipt" button
+ *   - ASSIGNED      → yellow "pending" banner + "Acknowledge Asset" button
  *   - ACKNOWLEDGED  → "Report an Issue" button (navigates to asset detail)
  *   - PENDING_REVIEW → orange "under IT review" banner
  *
@@ -92,7 +92,7 @@ function AssignedAssetCard({ assignment }) {
       {acknowledged && (
         <div className="flex items-center gap-2 bg-emerald-50 px-4 py-2.5 text-sm font-medium text-emerald-700">
           <CheckCircle className="h-4 w-4 shrink-0" />
-          Receipt acknowledged!
+          Asset acknowledged!
         </div>
       )}
       {status === AssetStatus.PENDING_REVIEW && (
@@ -171,7 +171,7 @@ function AssignedAssetCard({ assignment }) {
               disabled={isAcknowledging}
               className="w-full rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-700 disabled:opacity-50"
             >
-              {isAcknowledging ? 'Acknowledging…' : 'Acknowledge Receipt'}
+              {isAcknowledging ? 'Acknowledging…' : 'Acknowledge Asset'}
             </button>
           )}
           {status === AssetStatus.ACKNOWLEDGED && (

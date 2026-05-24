@@ -5,7 +5,7 @@ import { TICKET_ACTION_OPTIONS, TICKET_ACTIONS } from '../constants/tickets.js'
 
 /**
  * Modal for reviewing a support ticket.
- * Shows ticket details (read-only), an action select, and admin notes textarea.
+ * Shows ticket details (read-only), an action select, and admin notes when resolving.
  * Props:
  *   isOpen       — controls visibility
  *   onClose      — called when modal should close
@@ -34,8 +34,10 @@ function ReviewTicketModal({ isOpen, onClose, ticket, initialAction, onSuccess }
     event.preventDefault()
     setSubmitError(null)
 
+    const notesForSubmit = action === TICKET_ACTIONS.RESOLVE ? adminNotes : undefined
+
     try {
-      await reviewTicket({ ticketId: ticket.id, action, adminNotes })
+      await reviewTicket({ ticketId: ticket.id, action, adminNotes: notesForSubmit })
       setShowSuccess(true)
       onSuccess()
       setTimeout(() => {
@@ -43,6 +45,14 @@ function ReviewTicketModal({ isOpen, onClose, ticket, initialAction, onSuccess }
       }, 1000)
     } catch (err) {
       setSubmitError(err.message || 'Failed to review ticket. Please try again.')
+    }
+  }
+
+  function handleActionChange(event) {
+    const nextAction = event.target.value
+    setAction(nextAction)
+    if (nextAction !== TICKET_ACTIONS.RESOLVE) {
+      setAdminNotes('')
     }
   }
 
@@ -131,7 +141,7 @@ function ReviewTicketModal({ isOpen, onClose, ticket, initialAction, onSuccess }
               <select
                 id="reviewAction"
                 value={action}
-                onChange={(e) => setAction(e.target.value)}
+                onChange={handleActionChange}
                 disabled={isReviewing || showSuccess}
                 className="mt-1.5 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 disabled:bg-slate-100 disabled:text-slate-500"
               >
@@ -143,22 +153,24 @@ function ReviewTicketModal({ isOpen, onClose, ticket, initialAction, onSuccess }
               </select>
             </div>
 
-            {/* Admin notes */}
-            <div>
-              <label htmlFor="adminNotes" className="block text-sm font-medium text-slate-700">
-                Admin Notes <span className="text-slate-400 text-xs font-normal">(optional)</span>
-              </label>
-              <textarea
-                id="adminNotes"
-                value={adminNotes}
-                onChange={(e) => setAdminNotes(e.target.value)}
-                disabled={isReviewing || showSuccess}
-                rows={3}
-                maxLength={2000}
-                placeholder="Add any notes or comments..."
-                className="mt-1.5 block w-full resize-none rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 disabled:bg-slate-100"
-              />
-            </div>
+            {/* Admin notes — only when resolving */}
+            {action === TICKET_ACTIONS.RESOLVE && (
+              <div>
+                <label htmlFor="adminNotes" className="block text-sm font-medium text-slate-700">
+                  Admin Notes <span className="text-slate-400 text-xs font-normal">(optional)</span>
+                </label>
+                <textarea
+                  id="adminNotes"
+                  value={adminNotes}
+                  onChange={(e) => setAdminNotes(e.target.value)}
+                  disabled={isReviewing || showSuccess}
+                  rows={3}
+                  maxLength={2000}
+                  placeholder="Add resolution notes for the employee..."
+                  className="mt-1.5 block w-full resize-none rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 disabled:bg-slate-100"
+                />
+              </div>
+            )}
           </div>
 
           {/* Footer */}

@@ -165,7 +165,7 @@ function EmployeeAssetDetailPage() {
 
           {!canReport && !isPendingReview && (
             <p className="text-sm text-slate-500">
-              Reporting is available once you have acknowledged receipt of this asset.
+              Reporting is available once you have acknowledged the asset.
             </p>
           )}
 
