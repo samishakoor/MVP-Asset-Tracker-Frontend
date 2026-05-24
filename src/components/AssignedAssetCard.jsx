@@ -1,39 +1,39 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { AlertTriangle, Clock, CheckCircle, Wrench } from 'lucide-react'
-import { useAcknowledgeAsset } from '../hooks/useAcknowledgeAsset.js'
-import { AssetStatus } from '../constants/assets.js'
-import { employeeAssetDetailPath } from '../constants/routes.js'
-import { formatDate } from '../utils/datetime.js'
-import { formatAssetTypeLabel } from '../utils/assetType.js'
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { AlertTriangle, Clock, CheckCircle, Wrench } from "lucide-react";
+import { useAcknowledgeAsset } from "../hooks/useAcknowledgeAsset.js";
+import { AssetStatus } from "../constants/assets.js";
+import { employeeAssetDetailPath } from "../constants/routes.js";
+import { formatDate } from "../utils/datetime.js";
+import { formatAssetTypeLabel } from "../utils/assetType.js";
 
 const CONDITION_STYLES = {
-  new: 'bg-emerald-100 text-emerald-700',
-  good: 'bg-blue-100 text-blue-700',
-  fair: 'bg-yellow-100 text-yellow-700',
-  damaged: 'bg-red-100 text-red-700',
-}
+  new: "bg-emerald-100 text-emerald-700",
+  good: "bg-blue-100 text-blue-700",
+  fair: "bg-yellow-100 text-yellow-700",
+  damaged: "bg-red-100 text-red-700",
+};
 
 const CONDITION_LABELS = {
-  new: 'New',
-  good: 'Good',
-  fair: 'Fair',
-  damaged: 'Damaged',
-}
+  new: "New",
+  good: "Good",
+  fair: "Fair",
+  damaged: "Damaged",
+};
 
 const STATUS_STYLES = {
-  assigned: 'bg-orange-100 text-orange-700',
-  acknowledged: 'bg-emerald-100 text-emerald-700',
-  pending_review: 'bg-amber-100 text-amber-700',
-  under_repair: 'bg-purple-100 text-purple-700',
-}
+  assigned: "bg-orange-100 text-orange-700",
+  acknowledged: "bg-emerald-100 text-emerald-700",
+  pending_review: "bg-amber-100 text-amber-700",
+  under_repair: "bg-purple-100 text-purple-700",
+};
 
 const STATUS_LABELS = {
-  assigned: 'Pending',
-  acknowledged: 'Acknowledged',
-  pending_review: 'Pending Review',
-  under_repair: 'Under Repair',
-}
+  assigned: "Pending",
+  acknowledged: "Acknowledged",
+  pending_review: "Pending Review",
+  under_repair: "Under Repair",
+};
 
 /**
  * Card for a single active asset assignment on the employee dashboard.
@@ -48,47 +48,48 @@ const STATUS_LABELS = {
  *   assignment — assignment object from GET /users/me/assets
  */
 function AssignedAssetCard({ assignment }) {
-  const navigate = useNavigate()
-  const { acknowledgeAsset, isAcknowledging } = useAcknowledgeAsset()
-  const [acknowledged, setAcknowledged] = useState(false)
-  const [ackError, setAckError] = useState(null)
+  const navigate = useNavigate();
+  const { acknowledgeAsset, isAcknowledging } = useAcknowledgeAsset();
+  const [acknowledged, setAcknowledged] = useState(false);
+  const [ackError, setAckError] = useState(null);
 
-  const assetName = assignment.assetName ?? 'Unknown Asset'
-  const assetTypeLabel = formatAssetTypeLabel(assignment.assetType ?? '')
-  const condition = assignment.condition ?? ''
-  const serialNumber = assignment.serialNumber ?? ''
-  const status = assignment.currentStatus
-  const assignedDate = formatDate(assignment.assignedAt)
-  const acknowledgedDate = formatDate(assignment.acknowledgedAt)
-  const hasAcknowledged = Boolean(assignment.acknowledgedAt)
+  const assetName = assignment.assetName ?? "Unknown Asset";
+  const assetTypeLabel = formatAssetTypeLabel(assignment.assetType ?? "");
+  const condition = assignment.condition ?? "";
+  const serialNumber = assignment.serialNumber ?? "";
+  const status = assignment.currentStatus;
+  const assignedDate = formatDate(assignment.assignedAt);
+  const acknowledgedDate = formatDate(assignment.acknowledgedAt);
+  const hasAcknowledged = Boolean(assignment.acknowledgedAt);
 
-  const conditionClass = CONDITION_STYLES[condition] ?? 'bg-slate-100 text-slate-600'
-  const conditionLabel = CONDITION_LABELS[condition] ?? condition
-  const statusClass = STATUS_STYLES[status] ?? 'bg-slate-100 text-slate-600'
-  const statusLabel = STATUS_LABELS[status] ?? status
+  const conditionClass =
+    CONDITION_STYLES[condition] ?? "bg-slate-100 text-slate-600";
+  const conditionLabel = CONDITION_LABELS[condition] ?? condition;
+  const statusClass = STATUS_STYLES[status] ?? "bg-slate-100 text-slate-600";
+  const statusLabel = STATUS_LABELS[status] ?? status;
 
   async function handleAcknowledge() {
-    setAckError(null)
+    setAckError(null);
     try {
-      await acknowledgeAsset(assignment.id)
-      setAcknowledged(true)
+      await acknowledgeAsset(assignment.id);
+      setAcknowledged(true);
     } catch (err) {
-      setAckError(err.message || 'Failed to acknowledge. Please try again.')
+      setAckError(err.message || "Failed to acknowledge. Please try again.");
     }
   }
 
   function handleReportIssue() {
-    navigate(employeeAssetDetailPath(assignment.assetId))
+    navigate(employeeAssetDetailPath(assignment.assetId));
   }
 
   function handleViewDetails() {
-    navigate(employeeAssetDetailPath(assignment.assetId))
+    navigate(employeeAssetDetailPath(assignment.assetId));
   }
 
   const canViewDetails =
     status === AssetStatus.ACKNOWLEDGED ||
     status === AssetStatus.PENDING_REVIEW ||
-    status === AssetStatus.UNDER_REPAIR
+    status === AssetStatus.UNDER_REPAIR;
 
   return (
     <div className="flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
@@ -131,7 +132,9 @@ function AssignedAssetCard({ assignment }) {
               {assetName}
             </button>
           ) : (
-            <h3 className="text-lg font-bold leading-snug text-slate-900">{assetName}</h3>
+            <h3 className="text-lg font-bold leading-snug text-slate-900">
+              {assetName}
+            </h3>
           )}
           <span
             className={`mt-0.5 shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${statusClass}`}
@@ -160,16 +163,17 @@ function AssignedAssetCard({ assignment }) {
         <div className="mb-5 space-y-1.5 text-sm">
           {serialNumber && (
             <p className="text-slate-400">
-              <span className="font-medium text-slate-600">Serial:</span>{' '}
+              <span className="font-medium text-slate-600">Serial:</span>{" "}
               <span className="font-mono">{serialNumber}</span>
             </p>
           )}
           <p className="text-slate-500">
-            <span className="font-medium text-slate-600">Assigned:</span> {assignedDate}
+            <span className="font-medium text-slate-600">Assigned:</span>{" "}
+            {assignedDate}
           </p>
           {hasAcknowledged && (
             <p className="text-slate-500">
-              <span className="font-medium text-slate-600">Acknowledged:</span>{' '}
+              <span className="font-medium text-slate-600">Acknowledged:</span>{" "}
               {acknowledgedDate}
             </p>
           )}
@@ -191,31 +195,20 @@ function AssignedAssetCard({ assignment }) {
               disabled={isAcknowledging}
               className="w-full rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-700 disabled:opacity-50"
             >
-              {isAcknowledging ? 'Acknowledging…' : 'Acknowledge Asset'}
+              {isAcknowledging ? "Acknowledging…" : "Acknowledge Asset"}
             </button>
           )}
-          {status === AssetStatus.ACKNOWLEDGED && (
-            <button
-              type="button"
-              onClick={handleReportIssue}
-              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50"
-            >
-              Report an Issue
-            </button>
-          )}
-          {(status === AssetStatus.PENDING_REVIEW || status === AssetStatus.UNDER_REPAIR) && (
-            <button
-              type="button"
-              onClick={handleViewDetails}
-              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50"
-            >
-              View Asset Details
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={handleViewDetails}
+            className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50"
+          >
+            View Asset Details
+          </button>
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default AssignedAssetCard
+export default AssignedAssetCard;
