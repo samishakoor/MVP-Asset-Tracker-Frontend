@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { FileText, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useAuditLogs } from '../hooks/useAuditLogs.js'
-import { PageHeader, Spinner } from '../components/index.js'
-import AuditEventRow from '../components/AuditEventRow.jsx'
+import PageHeader from '../components/PageHeader.jsx'
+import Spinner from '../components/Spinner.jsx'
+import AuditLogCard from '../components/AuditLogCard.jsx'
 
 /**
  * Full audit logs page with paginated event history.
@@ -61,7 +62,7 @@ function AuditLogsPage() {
               ) : events && events.length > 0 ? (
                 <div className="divide-y divide-slate-200">
                   {events.map((event) => (
-                    <AuditEventRow
+                    <AuditLogCard
                       key={event.id}
                       eventType={event.event_type}
                       createdAt={event.created_at}
@@ -69,8 +70,6 @@ function AuditLogsPage() {
                       targetEmployeeName={event.target_employee_name}
                       notes={event.notes}
                       assetName={event.asset_name}
-                      assetId={event.asset_id}
-                      showAssetName={true}
                     />
                   ))}
                 </div>
@@ -78,7 +77,10 @@ function AuditLogsPage() {
                 <div className="flex h-full items-center justify-center p-8">
                   <div className="text-center">
                     <FileText className="mx-auto mb-3 h-12 w-12 text-slate-400" />
-                    <p className="text-sm text-slate-500">No audit logs found</p>
+                    <p className="text-sm font-medium text-slate-600">No audit events yet.</p>
+                    <p className="mt-1 text-xs text-slate-400">
+                      Asset lifecycle activity will appear here as it happens.
+                    </p>
                   </div>
                 </div>
               )}
