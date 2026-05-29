@@ -41,9 +41,15 @@ const initialAuthState = getStoredAuth()
 export function AuthProvider({ children }) {
   const [state, dispatch] = useReducer(authReducer, initialAuthState)
 
+  const logout = useCallback(() => {
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    dispatch({ type: 'LOGOUT' })
+  }, [])
+
   useEffect(function listenForSessionExpiry() {
     function handleSessionExpired() {
-      dispatch({ type: 'LOGOUT' })
+      logout()
     }
 
     window.addEventListener('auth-session-expired', handleSessionExpired)
@@ -51,7 +57,7 @@ export function AuthProvider({ children }) {
     return function cleanup() {
       window.removeEventListener('auth-session-expired', handleSessionExpired)
     }
-  }, [])
+  }, [logout])
 
   const persistAuth = useCallback((user, token) => {
     localStorage.setItem('token', token)
@@ -77,12 +83,6 @@ export function AuthProvider({ children }) {
     })
 
     return response.data.user
-  }, [])
-
-  const logout = useCallback(() => {
-    localStorage.removeItem('token')
-    localStorage.removeItem('user')
-    dispatch({ type: 'LOGOUT' })
   }, [])
 
   const isAdmin = state.user !== null && state.user.role === UserRole.ADMIN

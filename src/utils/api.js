@@ -2,6 +2,12 @@ import { AUTH_ERROR_MESSAGE } from '../constants/auth.js'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
+function clearAuthSessionAndNotify() {
+  localStorage.removeItem('token')
+  localStorage.removeItem('user')
+  window.dispatchEvent(new CustomEvent('auth-session-expired'))
+}
+
 /**
  * Performs an HTTP request to the asset tracker API.
  *
@@ -36,9 +42,15 @@ export async function apiRequest(path, options) {
     const message = body.message || `Request failed with status ${response.status}`
 
     if (response.status === 403 && message === AUTH_ERROR_MESSAGE.EMAIL_NOT_VERIFIED) {
-      localStorage.removeItem('token')
-      localStorage.removeItem('user')
-      window.dispatchEvent(new CustomEvent('auth-session-expired'))
+      clearAuthSessionAndNotify()
+    }
+
+    if (
+      response.status === 401 &&
+      token &&
+      message === AUTH_ERROR_MESSAGE.ACCESS_TOKEN_EXPIRED
+    ) {
+      clearAuthSessionAndNotify()
     }
 
     throw new Error(message)
