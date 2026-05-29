@@ -6,8 +6,12 @@ import { useAssignAsset } from '../hooks/useAssignAsset.js'
 import { useReturnAsset } from '../hooks/useReturnAsset.js'
 import { useCancelAssignment } from '../hooks/useCancelAssignment.js'
 import { PageHeader, Spinner, Table, ConfirmDialog } from '../components/index.js'
+import PaginationControls from '../components/PaginationControls.jsx'
+import PaginatedListContainer from '../components/PaginatedListContainer.jsx'
+import PaginatedListSkeleton from '../components/PaginatedListSkeleton.jsx'
 import { formatDate } from '../utils/datetime.js'
 import { AssetStatus } from '../constants/assets.js'
+import { isPaginatedPageFull, isPaginationResultEmpty } from '../utils/paginationUi.js'
 import { toast } from '../utils/toast.js'
 
 /**
@@ -24,13 +28,23 @@ function AssignmentsPage() {
   const [returnDialogOpen, setReturnDialogOpen] = useState(false)
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false)
   const [selectedAssignment, setSelectedAssignment] = useState(null)
+  const [assignmentsPage, setAssignmentsPage] = useState(1)
+  const assignmentsLimit = 6
 
   const { assets: availableAssets, isLoading: assetsLoading } = useAssets({
     status: 'available',
   })
-  const { assets: assignedAssets, isLoading: assignedLoading, refetch: refetchAssigned } = useAssets({
-    active_assignment: 'true',
-  })
+  const {
+    assets: assignedAssets,
+    pagination: assignmentsPagination,
+    isPending: assignedPending,
+    isFetching: assignmentsFetching,
+    error: assignmentsError,
+    refetch: refetchAssigned,
+  } = useAssets(
+    { active_assignment: 'true' },
+    { page: assignmentsPage, limit: assignmentsLimit }
+  )
   const { employees, isLoading: employeesLoading } = useEmployees()
   const { assignAsset, isSubmitting } = useAssignAsset()
   const { returnAsset, isReturning } = useReturnAsset()
@@ -108,6 +122,18 @@ function AssignmentsPage() {
     })
   }
 
+  function handleAssignmentsPreviousPage() {
+    if (assignmentsPage > 1) {
+      setAssignmentsPage(assignmentsPage - 1)
+    }
+  }
+
+  function handleAssignmentsNextPage() {
+    if (assignmentsPagination && assignmentsPage < assignmentsPagination.total_pages) {
+      setAssignmentsPage(assignmentsPage + 1)
+    }
+  }
+
   const activeAssignmentsData = useMemo(() => {
     return assignedAssets
       .filter((asset) => asset.currentAssignment)
@@ -122,6 +148,10 @@ function AssignmentsPage() {
         currentAssignment: asset.currentAssignment,
       }))
   }, [assignedAssets])
+
+  const assignmentsItemCount = activeAssignmentsData.length
+  const fillAssignmentsMobileViewport =
+    assignedPending || isPaginatedPageFull(assignmentsItemCount, assignmentsLimit)
 
   const columns = [
     { key: 'assetName', label: 'Asset Name' },
@@ -140,39 +170,77 @@ function AssignmentsPage() {
     {
       key: 'actions',
       label: 'Actions',
-      render: (_, row) => {
-        const canCancel = row.status === AssetStatus.ASSIGNED
-        const canReturn =
-          row.status !== AssetStatus.AVAILABLE && row.status !== AssetStatus.ASSIGNED
-
-        if (canCancel) {
-          return (
-            <button
-              type="button"
-              onClick={() => handleCancelClick(row)}
-              className="rounded-lg bg-amber-100 px-3 py-1.5 text-sm font-medium text-amber-800 transition-colors hover:bg-amber-200"
-            >
-              Cancel
-            </button>
-          )
-        }
-
-        if (canReturn) {
-          return (
-            <button
-              type="button"
-              onClick={() => handleReturnClick(row)}
-              className="rounded-lg bg-red-100 px-3 py-1.5 text-sm font-medium text-red-700 transition-colors hover:bg-red-200"
-            >
-              Return
-            </button>
-          )
-        }
-
-        return <span className="text-sm text-slate-400">—</span>
-      },
+      render: (_, row) => (
+        <AssignmentRowActions
+          row={row}
+          onCancelClick={handleCancelClick}
+          onReturnClick={handleReturnClick}
+        />
+      ),
     },
   ]
+
+  let activeAssignmentsContent = null
+
+  if (assignedPending) {
+    activeAssignmentsContent = (
+      <>
+        <div className="hidden sm:block">
+          <Spinner />
+        </div>
+        <PaginatedListContainer
+          className="sm:hidden"
+          borderRadiusClass="rounded-2xl"
+          fillViewport={fillAssignmentsMobileViewport}
+        >
+          <PaginatedListSkeleton count={assignmentsLimit} />
+        </PaginatedListContainer>
+      </>
+    )
+  } else if (assignmentsError) {
+    activeAssignmentsContent = (
+      <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">
+        <p className="text-sm">{assignmentsError.message || 'Failed to load active assignments'}</p>
+        <button
+          type="button"
+          onClick={() => refetchAssigned()}
+          className="mt-2 text-sm font-medium underline"
+        >
+          Retry
+        </button>
+      </div>
+    )
+  } else if (isPaginationResultEmpty(assignmentsPagination)) {
+    activeAssignmentsContent = (
+      <div className="rounded-lg border border-slate-200 bg-slate-50 p-12 text-center">
+        <p className="text-sm text-slate-500">No active assignments</p>
+      </div>
+    )
+  } else {
+    activeAssignmentsContent = (
+      <>
+        <div className="hidden sm:block">
+          <Table columns={columns} data={activeAssignmentsData} showMobileView={false} />
+        </div>
+        <PaginatedListContainer
+          className="sm:hidden"
+          borderRadiusClass="rounded-2xl"
+          fillViewport={fillAssignmentsMobileViewport}
+        >
+          <div className="flex flex-col divide-y divide-slate-200">
+            {activeAssignmentsData.map((row) => (
+              <ActiveAssignmentMobileCard
+                key={row.id}
+                row={row}
+                onCancelClick={handleCancelClick}
+                onReturnClick={handleReturnClick}
+              />
+            ))}
+          </div>
+        </PaginatedListContainer>
+      </>
+    )
+  }
 
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
@@ -266,16 +334,18 @@ function AssignmentsPage() {
 
       {/* Active Assignments Table */}
       <div>
-        <h2 className="mb-4 text-lg font-semibold text-slate-900">Active Assignments</h2>
-        {assignedLoading ? (
-          <Spinner />
-        ) : activeAssignmentsData.length > 0 ? (
-          <Table columns={columns} data={activeAssignmentsData} />
-        ) : (
-          <div className="rounded-lg border border-slate-200 bg-slate-50 p-12 text-center">
-            <p className="text-sm text-slate-500">No active assignments</p>
-          </div>
-        )}
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <h2 className="min-w-0 text-lg font-semibold text-slate-900">Active Assignments</h2>
+          <PaginationControls
+            pagination={assignmentsPagination}
+            page={assignmentsPage}
+            onPrevious={handleAssignmentsPreviousPage}
+            onNext={handleAssignmentsNextPage}
+            isFetching={assignmentsFetching}
+            ariaLabel="Active assignments pagination"
+          />
+        </div>
+        {activeAssignmentsContent}
       </div>
 
       {/* Return Confirmation Dialog */}
@@ -307,6 +377,74 @@ function AssignmentsPage() {
         confirmingLabel="Cancelling..."
       />
     </main>
+  )
+}
+
+/**
+ * Renders cancel/return actions for an active assignment row.
+ */
+function AssignmentRowActions({ row, onCancelClick, onReturnClick }) {
+  const canCancel = row.status === AssetStatus.ASSIGNED
+  const canReturn =
+    row.status !== AssetStatus.AVAILABLE && row.status !== AssetStatus.ASSIGNED
+
+  if (canCancel) {
+    return (
+      <button
+        type="button"
+        onClick={() => onCancelClick(row)}
+        className="rounded-lg bg-amber-100 px-3 py-1.5 text-sm font-medium text-amber-800 transition-colors hover:bg-amber-200"
+      >
+        Cancel
+      </button>
+    )
+  }
+
+  if (canReturn) {
+    return (
+      <button
+        type="button"
+        onClick={() => onReturnClick(row)}
+        className="rounded-lg bg-red-100 px-3 py-1.5 text-sm font-medium text-red-700 transition-colors hover:bg-red-200"
+      >
+        Return
+      </button>
+    )
+  }
+
+  return <span className="text-sm text-slate-400">—</span>
+}
+
+/**
+ * Mobile card for a single active assignment inside PaginatedListContainer.
+ */
+function ActiveAssignmentMobileCard({ row, onCancelClick, onReturnClick }) {
+  const acknowledgedLabel = row.acknowledgedAt ? formatDate(row.acknowledgedAt) : '—'
+
+  return (
+    <article className="w-full bg-white p-4">
+      <p className="truncate font-semibold text-slate-900">{row.assetName}</p>
+      <p className="mt-0.5 font-mono text-xs text-slate-500">{row.serialNumber}</p>
+      <p className="mt-2 text-sm text-slate-700">
+        <span className="font-medium text-slate-900">Employee:</span> {row.employeeName}
+      </p>
+      <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
+        <span>
+          <span className="font-medium text-slate-700">Assigned:</span>{' '}
+          {formatDate(row.assignedAt)}
+        </span>
+        <span>
+          <span className="font-medium text-slate-700">Acknowledged:</span> {acknowledgedLabel}
+        </span>
+      </div>
+      <div className="mt-3">
+        <AssignmentRowActions
+          row={row}
+          onCancelClick={onCancelClick}
+          onReturnClick={onReturnClick}
+        />
+      </div>
+    </article>
   )
 }
 

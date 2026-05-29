@@ -13,7 +13,7 @@ function PaginatedListContainer({ children, className, borderRadiusClass, fillVi
   let heightClass = 'max-h-[calc(100dvh-17rem)] lg:max-h-[calc(100dvh-10rem)]'
 
   if (fillViewport === true) {
-    heightClass = 'min-h-0 flex-1  max-h-[calc(100dvh-13rem)] lg:flex-none lg:max-h-[calc(100dvh-10rem)]'
+    heightClass = 'min-h-0 flex-1  max-h-[calc(100dvh-12rem)] lg:flex-none lg:max-h-[calc(100dvh-10rem)]'
   }
 
   const extraClass = className ? className : ''

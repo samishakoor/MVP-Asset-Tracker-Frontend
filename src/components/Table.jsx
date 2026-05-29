@@ -18,8 +18,9 @@ function getColumnCellClassName(column) {
  * Renders a clean striped table with thead and tbody.
  * On mobile, converts to stacked cards for better readability.
  * Set column.wrap to true for long text fields (e.g. descriptions) that should wrap instead of stretching the table.
+ * Pass showMobileView={false} when the parent renders a separate mobile list (e.g. inside PaginatedListContainer).
  */
-function Table({ columns, data }) {
+function Table({ columns, data, showMobileView }) {
   if (!data || data.length === 0) {
     return (
       <div className="rounded-lg border border-slate-200 bg-slate-50 px-6 py-12 text-center">
@@ -67,35 +68,37 @@ function Table({ columns, data }) {
       </div>
 
       {/* Mobile card view */}
-      <div className="divide-y divide-slate-200 sm:hidden">
-        {data.map((row, rowIndex) => (
-          <div key={row.id || rowIndex} className="space-y-3 px-4 py-4">
-            {columns.map((column) => (
-              <div
-                key={column.key}
-                className={
-                  column.wrap === true
-                    ? 'flex flex-col gap-1'
-                    : 'flex justify-between gap-2'
-                }
-              >
-                <span className="shrink-0 text-xs font-medium uppercase tracking-wider text-slate-500">
-                  {column.label}
-                </span>
-                <span
-                  className={`min-w-0 text-sm text-slate-900 whitespace-normal break-words ${
-                    column.wrap === true ? 'text-left' : 'wrap-break-word text-right'
-                  }`}
+      {showMobileView !== false && (
+        <div className="divide-y divide-slate-200 sm:hidden">
+          {data.map((row, rowIndex) => (
+            <div key={row.id || rowIndex} className="space-y-3 px-4 py-4">
+              {columns.map((column) => (
+                <div
+                  key={column.key}
+                  className={
+                    column.wrap === true
+                      ? 'flex flex-col gap-1'
+                      : 'flex justify-between gap-2'
+                  }
                 >
-                  {column.render
-                    ? column.render(row[column.key], row)
-                    : row[column.key]}
-                </span>
-              </div>
-            ))}
-          </div>
-        ))}
-      </div>
+                  <span className="shrink-0 text-xs font-medium uppercase tracking-wider text-slate-500">
+                    {column.label}
+                  </span>
+                  <span
+                    className={`min-w-0 text-sm text-slate-900 whitespace-normal break-words ${
+                      column.wrap === true ? 'text-left' : 'wrap-break-word text-right'
+                    }`}
+                  >
+                    {column.render
+                      ? column.render(row[column.key], row)
+                      : row[column.key]}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

@@ -26,7 +26,7 @@ const FILTER_TABS = [
  */
 function TicketsListPage() {
   const [page, setPage] = useState(1)
-  const limit = 15
+  const limit = 9
   const [activeFilter, setActiveFilter] = useState('all')
   const [selectedTicket, setSelectedTicket] = useState(null)
   const [initialAction, setInitialAction] = useState(null)
@@ -195,48 +195,49 @@ function TicketsListPage() {
     <PaginatedPageShell>
       <div className="mb-2 shrink-0 sm:mb-3">
         <PageHeader title="Support Tickets" />
-        <div className="mt-1">
-          <div className="mt-2 flex justify-end">
-            <PaginationControls
-              pagination={pagination}
-              page={page}
-              onPrevious={handlePreviousPage}
-              onNext={handleNextPage}
-              isFetching={isFetching}
-              ariaLabel="Support tickets pagination"
-            />
+      </div>
+
+      <div className="mb-4 shrink-0 sm:mb-6">
+        <div className="-mx-1 overflow-x-auto px-1 pb-1">
+          <div className="flex min-w-max gap-2 py-1">
+            {FILTER_TABS.map((tab) => {
+              const count = getTabCount(tab.value)
+              const isActive = activeFilter === tab.value
+              return (
+                <button
+                  key={tab.value}
+                  type="button"
+                  onClick={() => handleFilterChange(tab.value)}
+                  className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
+                    isActive
+                      ? 'border-emerald-600 bg-emerald-600 text-white shadow-sm'
+                      : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50'
+                  }`}
+                >
+                  {tab.label}
+                  <span
+                    className={`rounded-full px-1.5 py-0.5 text-xs font-semibold ${
+                      isActive ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-600'
+                    }`}
+                  >
+                    {count}
+                  </span>
+                </button>
+              )
+            })}
           </div>
         </div>
       </div>
 
-      <div className="mb-4 shrink-0 overflow-x-auto sm:mb-6">
-        <div className="flex min-w-max gap-2">
-          {FILTER_TABS.map((tab) => {
-            const count = getTabCount(tab.value)
-            const isActive = activeFilter === tab.value
-            return (
-              <button
-                key={tab.value}
-                type="button"
-                onClick={() => handleFilterChange(tab.value)}
-                className={`inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-                  isActive
-                    ? 'bg-emerald-600 text-white shadow-sm'
-                    : 'bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50'
-                }`}
-              >
-                {tab.label}
-                <span
-                  className={`rounded-full px-1.5 py-0.5 text-xs font-semibold ${
-                    isActive ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-600'
-                  }`}
-                >
-                  {count}
-                </span>
-              </button>
-            )
-          })}
-        </div>
+      <div className="mb-3 flex shrink-0 justify-end sm:mb-4">
+        <PaginationControls
+          pagination={pagination}
+          page={page}
+          onPrevious={handlePreviousPage}
+          onNext={handleNextPage}
+          isFetching={isFetching}
+          ariaLabel="Support tickets pagination"
+        />
       </div>
 
       {mainContent}
