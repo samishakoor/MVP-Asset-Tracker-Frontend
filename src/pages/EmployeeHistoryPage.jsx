@@ -6,7 +6,7 @@ import HistoryPageSkeleton from '../components/HistoryPageSkeleton.jsx'
 import PaginatedListContainer from '../components/PaginatedListContainer.jsx'
 import PaginatedPageShell from '../components/PaginatedPageShell.jsx'
 import PaginatedListEmpty from '../components/PaginatedListEmpty.jsx'
-import { isPaginatedPageFull } from '../utils/paginationUi.js'
+import { isPaginatedPageFull, isPaginationResultEmpty } from '../utils/paginationUi.js'
 
 /**
  * Calculates the number of days between two dates.
@@ -93,15 +93,13 @@ function EmployeeHistoryPage() {
         </button>
       </div>
     )
-  } else if (history.length === 0) {
+  } else if (isPaginationResultEmpty(pagination)) {
     mainContent = (
-      <div className="rounded-2xl border border-dashed border-slate-300 bg-white">
-        <PaginatedListEmpty
-          icon={History}
-          title="No returned assets yet."
-          description="Assets you return will appear here."
-        />
-      </div>
+      <PaginatedListEmpty
+        icon={History}
+        title="No returned assets yet."
+        description="Assets you return will appear here."
+      />
     )
   } else {
     mainContent = (

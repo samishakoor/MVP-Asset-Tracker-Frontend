@@ -8,7 +8,7 @@ import PaginatedListSkeleton from '../components/PaginatedListSkeleton.jsx'
 import PaginatedListContainer from '../components/PaginatedListContainer.jsx'
 import PaginatedPageShell from '../components/PaginatedPageShell.jsx'
 import PaginatedListEmpty from '../components/PaginatedListEmpty.jsx'
-import { isPaginatedPageFull } from '../utils/paginationUi.js'
+import { isPaginatedPageFull, isPaginationResultEmpty } from '../utils/paginationUi.js'
 
 /**
  * Notifications page for employees with pagination.
@@ -78,14 +78,21 @@ function NotificationsPage() {
         ))}
       </div>
     )
-  } else {
-    listContent = (
+  }
+
+  const isEmptyList = isPaginationResultEmpty(pagination)
+
+  let listArea = null
+  if (isEmptyList) {
+    listArea = (
       <PaginatedListEmpty
         icon={Bell}
         title="No notifications yet."
         description="Asset activity notifications will appear here."
       />
     )
+  } else {
+    listArea = <PaginatedListContainer fillViewport={fillViewport}>{listContent}</PaginatedListContainer>
   }
 
   return (
@@ -123,7 +130,7 @@ function NotificationsPage() {
         </div>
       </div>
 
-      <PaginatedListContainer fillViewport={fillViewport}>{listContent}</PaginatedListContainer>
+      {listArea}
     </PaginatedPageShell>
   )
 }

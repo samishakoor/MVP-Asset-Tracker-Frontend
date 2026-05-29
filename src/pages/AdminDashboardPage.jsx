@@ -169,13 +169,6 @@ function AdminDashboardPage() {
         ) : (
           <div className="rounded-lg border border-slate-200 bg-slate-50 p-8 text-center">
             <p className="text-sm text-slate-500">No recent events</p>
-            <Link
-              to={ADMIN_AUDIT_LOGS_PATH}
-              className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-emerald-700 hover:text-emerald-800"
-            >
-              Go to audit logs
-              <ArrowRight className="h-4 w-4" />
-            </Link>
           </div>
         )}
       </section>

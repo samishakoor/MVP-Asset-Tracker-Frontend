@@ -1,16 +1,15 @@
 /**
- * Centered empty state for paginated list containers without forcing full container height.
+ * Dashed-border empty state for paginated list pages (matches Support Tickets empty card).
+ * Render outside PaginatedListContainer when pagination total is zero.
  */
 function PaginatedListEmpty({ icon: Icon, title, description }) {
   return (
-    <div className="flex min-h-[10rem] items-center justify-center px-6 py-10 sm:min-h-[12rem] sm:py-12">
-      <div className="text-center">
-        <Icon className="mx-auto mb-3 h-10 w-10 text-slate-400 sm:h-12 sm:w-12" />
-        <p className="text-sm font-medium text-slate-600">{title}</p>
-        {description && description !== '' && (
-          <p className="mt-1 text-xs text-slate-400">{description}</p>
-        )}
-      </div>
+    <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-white py-16 text-center">
+      <Icon className="mb-3 h-10 w-10 text-slate-300" aria-hidden="true" />
+      <p className="text-sm font-medium text-slate-600">{title}</p>
+      {description && description !== '' && (
+        <p className="mt-1 text-xs text-slate-400">{description}</p>
+      )}
     </div>
   )
 }

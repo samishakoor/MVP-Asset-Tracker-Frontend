@@ -2,18 +2,18 @@ import { ArrowLeft, ArrowRight } from 'lucide-react'
 
 /**
  * Compact previous/next arrow pagination for list pages.
- * Renders nothing when pagination metadata is absent.
+ * Renders nothing when pagination metadata is absent or the list has no items.
  * Used on AuditLogsPage, NotificationsPage, and EmployeeHistoryPage.
  */
 function PaginationControls({ pagination, page, onPrevious, onNext, isFetching, ariaLabel }) {
-  if (!pagination) {
+  if (!pagination || pagination.total === 0 || pagination.total_pages === 0) {
     return null
   }
 
   const hasPreviousPage = page > 1
   const hasNextPage = page < pagination.total_pages
   const isDisabled = isFetching === true
-  const totalPages = pagination.total_pages === 0 ? 1 : pagination.total_pages
+  const totalPages = pagination.total_pages
   const pageLabel = `Page ${page} of ${totalPages}`
 
   return (

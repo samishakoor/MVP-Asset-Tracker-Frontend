@@ -7,7 +7,7 @@ import PaginatedListSkeleton from '../components/PaginatedListSkeleton.jsx'
 import PaginatedListContainer from '../components/PaginatedListContainer.jsx'
 import PaginatedPageShell from '../components/PaginatedPageShell.jsx'
 import PaginatedListEmpty from '../components/PaginatedListEmpty.jsx'
-import { isPaginatedPageFull } from '../utils/paginationUi.js'
+import { isPaginatedPageFull, isPaginationResultEmpty } from '../utils/paginationUi.js'
 
 /**
  * Full audit logs page with paginated event history.
@@ -72,14 +72,21 @@ function AuditLogsPage() {
         ))}
       </div>
     )
-  } else {
-    listContent = (
+  }
+
+  const isEmptyList = isPaginationResultEmpty(pagination)
+
+  let listArea = null
+  if (isEmptyList) {
+    listArea = (
       <PaginatedListEmpty
         icon={FileText}
         title="No audit events yet."
         description="Asset lifecycle activity will appear here as it happens."
       />
     )
+  } else {
+    listArea = <PaginatedListContainer fillViewport={fillViewport}>{listContent}</PaginatedListContainer>
   }
 
   return (
@@ -103,7 +110,7 @@ function AuditLogsPage() {
         </div>
       </div>
 
-      <PaginatedListContainer fillViewport={fillViewport}>{listContent}</PaginatedListContainer>
+      {listArea}
     </PaginatedPageShell>
   )
 }
