@@ -1,7 +1,6 @@
 import { useState } from 'react'
-import { FileText, ChevronLeft, ChevronRight } from 'lucide-react'
+import { ArrowLeft, ArrowRight, FileText } from 'lucide-react'
 import { useAuditLogs } from '../hooks/useAuditLogs.js'
-import PageHeader from '../components/PageHeader.jsx'
 import Spinner from '../components/Spinner.jsx'
 import AuditLogCard from '../components/AuditLogCard.jsx'
 
@@ -27,15 +26,44 @@ function AuditLogsPage() {
     }
   }
 
+  const hasPreviousPage = page > 1
+  const hasNextPage = Boolean(pagination) && page < pagination.total_pages
+
   return (
     <div className="fixed inset-x-0 bottom-0 top-16 z-0 flex flex-col overflow-hidden bg-slate-50 lg:static lg:z-auto lg:h-screen">
       <div className="mx-auto flex min-h-0 w-full max-w-7xl flex-1 flex-col overflow-hidden px-4 pt-4 pb-4 sm:px-6 sm:pt-6 lg:px-8">
-        <div className="shrink-0">
-          <PageHeader
-            title="Audit Logs"
-            subtitle="Complete history of all asset-related events"
-            compact={true}
-          />
+        <div className="mb-2 shrink-0 sm:mb-3">
+          <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">Audit Logs</h1>
+          <div className="mt-1 flex items-center justify-between gap-3">
+            <p className="min-w-0 text-sm text-slate-600 sm:text-base">
+              Complete history of all asset-related events
+            </p>
+            {pagination && (
+              <nav
+                className="flex shrink-0 items-center gap-1"
+                aria-label="Audit log pagination"
+              >
+                <button
+                  type="button"
+                  onClick={handlePreviousPage}
+                  disabled={!hasPreviousPage || isFetching}
+                  aria-label="Previous page"
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-900 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+                </button>
+                <button
+                  type="button"
+                  onClick={handleNextPage}
+                  disabled={!hasNextPage || isFetching}
+                  aria-label="Next page"
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-900 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                </button>
+              </nav>
+            )}
+          </div>
         </div>
 
         {isFetching ? (
@@ -45,7 +73,7 @@ function AuditLogsPage() {
         ) : (
           <>
             {/* Scrollable Logs Container */}
-            <div className="mb-3 min-h-0 flex-1 overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-sm">
+            <div className="min-h-0 flex-1 overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-sm">
               {error ? (
                 <div className="p-4">
                   <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">
@@ -85,37 +113,6 @@ function AuditLogsPage() {
                 </div>
               )}
             </div>
-
-            {/* Pagination Controls */}
-            {pagination && pagination.total_pages > 1 && (
-              <div className="shrink-0 flex flex-col gap-3 rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-center text-sm text-slate-600 sm:text-left">
-                  Page {pagination.page} of {pagination.total_pages} ({pagination.total} total events)
-                </p>
-
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={handlePreviousPage}
-                    disabled={page === 1}
-                    className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 sm:flex-initial"
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                    Previous
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={handleNextPage}
-                    disabled={!pagination || page === pagination.total_pages}
-                    className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 sm:flex-initial"
-                  >
-                    Next
-                    <ChevronRight className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-            )}
           </>
         )}
       </div>
