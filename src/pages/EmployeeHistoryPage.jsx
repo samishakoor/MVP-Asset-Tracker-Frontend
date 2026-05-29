@@ -3,6 +3,10 @@ import { History } from 'lucide-react'
 import { useMyHistory } from '../hooks/useMyHistory.js'
 import PaginationControls from '../components/PaginationControls.jsx'
 import HistoryPageSkeleton from '../components/HistoryPageSkeleton.jsx'
+import PaginatedListContainer from '../components/PaginatedListContainer.jsx'
+import PaginatedPageShell from '../components/PaginatedPageShell.jsx'
+import PaginatedListEmpty from '../components/PaginatedListEmpty.jsx'
+import { isPaginatedPageFull } from '../utils/paginationUi.js'
 
 /**
  * Calculates the number of days between two dates.
@@ -56,13 +60,25 @@ function EmployeeHistoryPage() {
     }
   }
 
+  const itemCount = history ? history.length : 0
+  const fillMobileViewport = isPending || isPaginatedPageFull(itemCount, limit)
+
   let mainContent = null
 
   if (isPending) {
     mainContent = (
-      <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <HistoryPageSkeleton count={limit} />
-      </div>
+      <>
+        <div className="hidden overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm sm:block">
+          <HistoryPageSkeleton count={limit} />
+        </div>
+        <PaginatedListContainer
+          className="sm:hidden"
+          borderRadiusClass="rounded-2xl"
+          fillViewport={fillMobileViewport}
+        >
+          <HistoryPageSkeleton count={limit} />
+        </PaginatedListContainer>
+      </>
     )
   } else if (error) {
     mainContent = (
@@ -79,23 +95,20 @@ function EmployeeHistoryPage() {
     )
   } else if (history.length === 0) {
     mainContent = (
-      <div className="flex min-h-0 flex-1 items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-white">
-        <div className="p-8 text-center">
-          <History className="mx-auto mb-3 h-10 w-10 text-slate-300" />
-          <p className="text-sm font-medium text-slate-600">No returned assets yet.</p>
-          <p className="mt-1 text-xs text-slate-400">
-            Assets you return will appear here.
-          </p>
-        </div>
+      <div className="rounded-2xl border border-dashed border-slate-300 bg-white">
+        <PaginatedListEmpty
+          icon={History}
+          title="No returned assets yet."
+          description="Assets you return will appear here."
+        />
       </div>
     )
   } else {
     mainContent = (
-      <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
-        {/* Desktop table */}
-        <div className="hidden sm:block">
+      <>
+        <div className="hidden overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm sm:block">
           <table className="min-w-full divide-y divide-slate-200">
-            <thead className="sticky top-0 z-10 bg-slate-50">
+            <thead className="bg-slate-50">
               <tr>
                 <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
                   Asset Name
@@ -145,56 +158,58 @@ function EmployeeHistoryPage() {
           </table>
         </div>
 
-        {/* Mobile rows — full width inside scroll container */}
-        <div className="flex flex-col divide-y divide-slate-200 sm:hidden">
-          {history.map((item) => {
-            const days = daysBetween(item.assignedAt, item.returnedAt)
-            return (
-              <article
-                key={item.id}
-                className="w-full bg-white p-4"
-              >
-                <div className="mb-2 flex items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    <p className="truncate font-semibold text-slate-900">{item.assetName}</p>
-                    <p className="mt-0.5 text-xs capitalize text-slate-500">{item.assetType}</p>
+        <PaginatedListContainer
+          className="sm:hidden"
+          borderRadiusClass="rounded-2xl"
+          fillViewport={fillMobileViewport}
+        >
+          <div className="flex flex-col divide-y divide-slate-200">
+            {history.map((item) => {
+              const days = daysBetween(item.assignedAt, item.returnedAt)
+              return (
+                <article key={item.id} className="w-full bg-white p-4">
+                  <div className="mb-2 flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="truncate font-semibold text-slate-900">{item.assetName}</p>
+                      <p className="mt-0.5 text-xs capitalize text-slate-500">{item.assetType}</p>
+                    </div>
+                    <span className="shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">
+                      {days} {days === 1 ? 'day' : 'days'}
+                    </span>
                   </div>
-                  <span className="shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">
-                    {days} {days === 1 ? 'day' : 'days'}
-                  </span>
-                </div>
 
-                {item.serialNumber && (
-                  <p className="mb-2 font-mono text-xs text-slate-400">{item.serialNumber}</p>
-                )}
+                  {item.serialNumber && (
+                    <p className="mb-2 font-mono text-xs text-slate-400">{item.serialNumber}</p>
+                  )}
 
-                <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
-                  <span>
-                    <span className="font-medium text-slate-700">Assigned:</span>{' '}
-                    {formatDate(item.assignedAt)}
-                  </span>
-                  <span>
-                    <span className="font-medium text-slate-700">Returned:</span>{' '}
-                    {formatDate(item.returnedAt)}
-                  </span>
-                </div>
-              </article>
-            )
-          })}
-        </div>
-      </div>
+                  <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
+                    <span>
+                      <span className="font-medium text-slate-700">Assigned:</span>{' '}
+                      {formatDate(item.assignedAt)}
+                    </span>
+                    <span>
+                      <span className="font-medium text-slate-700">Returned:</span>{' '}
+                      {formatDate(item.returnedAt)}
+                    </span>
+                  </div>
+                </article>
+              )
+            })}
+          </div>
+        </PaginatedListContainer>
+      </>
     )
   }
 
   return (
-    <div className="fixed inset-x-0 bottom-0 top-16 z-0 flex flex-col overflow-hidden bg-slate-50 lg:static lg:z-auto lg:h-screen">
-      <div className="mx-auto flex min-h-0 w-full max-w-7xl flex-1 flex-col overflow-hidden px-4 pt-4 pb-4 sm:px-6 sm:pt-6 lg:px-8">
-        <div className="mb-2 shrink-0 sm:mb-3">
-          <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">My Asset History</h1>
-          <div className="mt-1 flex items-center justify-between gap-3">
-            <p className="min-w-0 text-sm text-slate-600 sm:text-base">
-              Assets you previously returned
-            </p>
+    <PaginatedPageShell>
+      <div className="mb-2 shrink-0 sm:mb-3">
+        <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">My Asset History</h1>
+        <div className="mt-1">
+          <p className="text-sm text-slate-600 sm:text-base">
+            Assets you previously returned
+          </p>
+          <div className="mt-2 flex justify-end">
             <PaginationControls
               pagination={pagination}
               page={page}
@@ -205,10 +220,10 @@ function EmployeeHistoryPage() {
             />
           </div>
         </div>
-
-        {mainContent}
       </div>
-    </div>
+
+      {mainContent}
+    </PaginatedPageShell>
   )
 }
 
