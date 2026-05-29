@@ -4,6 +4,130 @@
  */
 
 /**
+ * @typedef {{ text: string, bold: boolean }} AuditLogTitlePart
+ */
+
+/**
+ * @param {string} text
+ * @param {boolean} bold
+ * @returns {AuditLogTitlePart}
+ */
+function titlePart(text, bold) {
+  return { text, bold }
+}
+
+/**
+ * @param {string|undefined} name
+ * @returns {boolean}
+ */
+function isBoldName(name) {
+  return name !== undefined && name !== ''
+}
+
+/**
+ * Returns title segments so only asset and employee names are emphasized in the UI.
+ *
+ * @param {string} eventType
+ * @param {string} assetName
+ * @param {string} triggeredByName
+ * @param {string|null|undefined} targetEmployeeName
+ * @returns {AuditLogTitlePart[]}
+ */
+export function getAuditLogTitleParts(
+  eventType,
+  assetName,
+  triggeredByName,
+  targetEmployeeName,
+) {
+  const asset = assetName || 'Asset'
+  const assetBold = isBoldName(assetName)
+  const employeeBold = isBoldName(targetEmployeeName)
+  const actorBold = isBoldName(triggeredByName)
+
+  if (eventType === 'registered') {
+    return [titlePart(asset, assetBold), titlePart(' has been added to inventory', false)]
+  }
+
+  if (eventType === 'deleted') {
+    return [titlePart(asset, assetBold), titlePart(' has been removed from inventory', false)]
+  }
+
+  if (eventType === 'assigned') {
+    if (targetEmployeeName) {
+      return [
+        titlePart(asset, assetBold),
+        titlePart(' has been assigned to ', false),
+        titlePart(targetEmployeeName, employeeBold),
+      ]
+    }
+    return [titlePart(asset, assetBold), titlePart(' has been assigned', false)]
+  }
+
+  if (eventType === 'assignment_cancelled') {
+    if (targetEmployeeName) {
+      return [
+        titlePart('Assignment of ', false),
+        titlePart(asset, assetBold),
+        titlePart(' has been cancelled for ', false),
+        titlePart(targetEmployeeName, employeeBold),
+      ]
+    }
+    return [
+      titlePart('Assignment of ', false),
+      titlePart(asset, assetBold),
+      titlePart(' has been cancelled', false),
+    ]
+  }
+
+  if (eventType === 'acknowledged') {
+    return [
+      titlePart(triggeredByName, actorBold),
+      titlePart(' has acknowledged ', false),
+      titlePart(asset, assetBold),
+    ]
+  }
+
+  if (eventType === 'ticket_opened') {
+    return [
+      titlePart('A support ticket has been opened for ', false),
+      titlePart(asset, assetBold),
+    ]
+  }
+
+  if (eventType === 'repair_started') {
+    return [titlePart(asset, assetBold), titlePart(' has been marked under repair', false)]
+  }
+
+  if (eventType === 'repair_completed') {
+    return [
+      titlePart('Repair has been completed for ', false),
+      titlePart(asset, assetBold),
+    ]
+  }
+
+  if (eventType === 'returned') {
+    if (targetEmployeeName) {
+      return [
+        titlePart(targetEmployeeName, employeeBold),
+        titlePart(' has returned ', false),
+        titlePart(asset, assetBold),
+      ]
+    }
+    return [titlePart(asset, assetBold), titlePart(' has been returned', false)]
+  }
+
+  if (targetEmployeeName) {
+    return [
+      titlePart(asset, assetBold),
+      titlePart(' has been updated for ', false),
+      titlePart(targetEmployeeName, employeeBold),
+    ]
+  }
+
+  return [titlePart(asset, assetBold), titlePart(' has been updated', false)]
+}
+
+/**
  * @param {string} eventType
  * @param {string} assetName
  * @param {string} triggeredByName
@@ -16,58 +140,117 @@ export function formatAuditLogTitle(
   triggeredByName,
   targetEmployeeName,
 ) {
-  const asset = assetName || 'Asset'
+  return getAuditLogTitleParts(
+    eventType,
+    assetName,
+    triggeredByName,
+    targetEmployeeName,
+  )
+    .map((part) => part.text)
+    .join('')
+}
+
+/**
+ * Returns description segments with the actionee name lightly emphasized.
+ *
+ * @param {string} eventType
+ * @param {string} triggeredByName
+ * @param {string|null|undefined} targetEmployeeName
+ * @returns {AuditLogTitlePart[]}
+ */
+export function getAuditLogDescriptionParts(
+  eventType,
+  triggeredByName,
+  targetEmployeeName,
+) {
+  const actorBold = isBoldName(triggeredByName)
+  const employeeBold = isBoldName(targetEmployeeName)
 
   if (eventType === 'registered') {
-    return `${asset} added to inventory`
+    return [
+      titlePart('Registered by ', false),
+      titlePart(triggeredByName, actorBold),
+    ]
   }
 
   if (eventType === 'deleted') {
-    return `${asset} removed from inventory`
+    return [
+      titlePart('Removed by ', false),
+      titlePart(triggeredByName, actorBold),
+    ]
   }
 
   if (eventType === 'assigned') {
-    if (targetEmployeeName) {
-      return `${asset} assigned to ${targetEmployeeName}`
-    }
-    return `${asset} assigned`
+    return [
+      titlePart('Assigned by ', false),
+      titlePart(triggeredByName, actorBold),
+    ]
   }
 
   if (eventType === 'assignment_cancelled') {
-    if (targetEmployeeName) {
-      return `Assignment cancelled for ${targetEmployeeName}`
-    }
-    return `Assignment cancelled for ${asset}`
+    return [
+      titlePart('Cancelled by ', false),
+      titlePart(triggeredByName, actorBold),
+    ]
   }
 
   if (eventType === 'acknowledged') {
-    return `${triggeredByName} acknowledged ${asset}`
+    return [titlePart('Receipt confirmed', false)]
   }
 
   if (eventType === 'ticket_opened') {
-    return `Support ticket opened for ${asset}`
+    return [
+      titlePart('Reported by ', false),
+      titlePart(triggeredByName, actorBold),
+    ]
   }
 
   if (eventType === 'repair_started') {
-    return `${asset} marked under repair`
+    if (targetEmployeeName) {
+      return [
+        titlePart('Started by ', false),
+        titlePart(triggeredByName, actorBold),
+        titlePart(' · Assigned to ', false),
+        titlePart(targetEmployeeName, employeeBold),
+      ]
+    }
+    return [
+      titlePart('Started by ', false),
+      titlePart(triggeredByName, actorBold),
+    ]
   }
 
   if (eventType === 'repair_completed') {
-    return `Repair completed for ${asset}`
+    if (targetEmployeeName) {
+      return [
+        titlePart('Completed by ', false),
+        titlePart(triggeredByName, actorBold),
+        titlePart(' · Assigned to ', false),
+        titlePart(targetEmployeeName, employeeBold),
+      ]
+    }
+    return [
+      titlePart('Completed by ', false),
+      titlePart(triggeredByName, actorBold),
+    ]
   }
 
   if (eventType === 'returned') {
-    if (targetEmployeeName) {
-      return `${targetEmployeeName} returned ${asset}`
-    }
-    return `${asset} returned`
+    return [
+      titlePart('Recorded by ', false),
+      titlePart(triggeredByName, actorBold),
+    ]
   }
 
   if (targetEmployeeName) {
-    return `${asset} · ${targetEmployeeName}`
+    return [
+      titlePart(targetEmployeeName, employeeBold),
+      titlePart(' · ', false),
+      titlePart(triggeredByName, actorBold),
+    ]
   }
 
-  return asset
+  return [titlePart(triggeredByName, actorBold)]
 }
 
 /**
@@ -77,53 +260,9 @@ export function formatAuditLogTitle(
  * @returns {string}
  */
 export function formatAuditLogDescription(eventType, triggeredByName, targetEmployeeName) {
-  if (eventType === 'registered') {
-    return `Registered by ${triggeredByName}`
-  }
-
-  if (eventType === 'deleted') {
-    return `Removed by ${triggeredByName}`
-  }
-
-  if (eventType === 'assigned') {
-    return `Assigned by ${triggeredByName}`
-  }
-
-  if (eventType === 'assignment_cancelled') {
-    return `Cancelled by ${triggeredByName}`
-  }
-
-  if (eventType === 'acknowledged') {
-    return 'Receipt confirmed'
-  }
-
-  if (eventType === 'ticket_opened') {
-    return `Reported by ${triggeredByName}`
-  }
-
-  if (eventType === 'repair_started') {
-    if (targetEmployeeName) {
-      return `Started by ${triggeredByName} · Assigned to ${targetEmployeeName}`
-    }
-    return `Started by ${triggeredByName}`
-  }
-
-  if (eventType === 'repair_completed') {
-    if (targetEmployeeName) {
-      return `Completed by ${triggeredByName} · Assigned to ${targetEmployeeName}`
-    }
-    return `Completed by ${triggeredByName}`
-  }
-
-  if (eventType === 'returned') {
-    return `Recorded by ${triggeredByName}`
-  }
-
-  if (targetEmployeeName) {
-    return `${targetEmployeeName} · ${triggeredByName}`
-  }
-
-  return triggeredByName
+  return getAuditLogDescriptionParts(eventType, triggeredByName, targetEmployeeName)
+    .map((part) => part.text)
+    .join('')
 }
 
 export const AUDIT_EVENT_TYPE_LABELS = {

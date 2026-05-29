@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { Package, CheckCircle, Users, Wrench, AlertCircle, ArrowRight } from 'lucide-react'
 import { useAdminSummary } from '../hooks/useAdminSummary.js'
 import { PageHeader, Spinner, Table } from '../components/index.js'
-import AuditEventRow from '../components/AuditEventRow.jsx'
+import AuditLogCard from '../components/AuditLogCard.jsx'
 import { ADMIN_AUDIT_LOGS_PATH } from '../constants/routes.js'
 
 /**
@@ -154,7 +154,7 @@ function AdminDashboardPage() {
           <div className="rounded-lg border border-slate-200 bg-white shadow-sm">
             <div className="divide-y divide-slate-200">
               {recentEvents.map((event) => (
-                <AuditEventRow
+                <AuditLogCard
                   key={event.id}
                   eventType={event.event_type}
                   createdAt={event.created_at}
@@ -162,8 +162,6 @@ function AdminDashboardPage() {
                   targetEmployeeName={event.target_employee_name}
                   notes={event.notes}
                   assetName={event.asset_name}
-                  assetId={event.asset_id}
-                  showAssetName={true}
                 />
               ))}
             </div>

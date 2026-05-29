@@ -17,8 +17,8 @@ import {
   AUDIT_EVENT_STYLES,
   AUDIT_EVENT_TYPE_LABELS,
   DEFAULT_AUDIT_EVENT_STYLES,
-  formatAuditLogDescription,
-  formatAuditLogTitle,
+  getAuditLogDescriptionParts,
+  getAuditLogTitleParts,
 } from '../utils/auditLogDisplay.js'
 
 const AUDIT_EVENT_ICONS = {
@@ -49,23 +49,20 @@ function AuditLogCard({
   const Icon = AUDIT_EVENT_ICONS[eventType] ?? Bell
   const styles = AUDIT_EVENT_STYLES[eventType] ?? DEFAULT_AUDIT_EVENT_STYLES
   const typeLabel = AUDIT_EVENT_TYPE_LABELS[eventType] ?? 'Event'
-  const title = formatAuditLogTitle(
+  const titleParts = getAuditLogTitleParts(
     eventType,
     assetName,
     triggeredByName,
     targetEmployeeName,
   )
-  const description = formatAuditLogDescription(
+  const descriptionParts = getAuditLogDescriptionParts(
     eventType,
     triggeredByName,
     targetEmployeeName,
   )
+  const hasDescription = descriptionParts.some((part) => part.text !== '')
   const relativeTime = formatRelativeTime(createdAt)
   const fullDate = formatDate(createdAt)
-  const showAssetLine =
-    assetName !== undefined &&
-    assetName !== '' &&
-    !title.includes(assetName)
 
   const timeLabel = (
     <span className="inline-flex items-center gap-1 whitespace-nowrap text-xs text-slate-400">
@@ -94,17 +91,27 @@ function AuditLogCard({
             </span>
           </div>
 
-          <h3 className="mt-2 text-sm font-semibold leading-snug text-slate-900 sm:text-base">
-            {title}
+          <h3 className="mt-2 text-sm font-normal leading-snug text-slate-600 sm:text-base">
+            {titleParts.map((part, index) => (
+              <span
+                key={index}
+                className={part.bold ? 'font-semibold text-slate-900' : undefined}
+              >
+                {part.text}
+              </span>
+            ))}
           </h3>
 
-          {description && description !== '' && (
-            <p className="m-0 mt-1.5 w-full text-sm text-slate-600">{description}</p>
-          )}
-          {showAssetLine && (
-            <p className="m-0 mt-1 text-sm">
-              <span className="font-medium text-slate-500">Asset:</span>{' '}
-              <span className="font-medium text-slate-800">{assetName}</span>
+          {hasDescription && (
+            <p className="m-0 mt-1.5 w-full text-sm font-normal text-slate-600">
+              {descriptionParts.map((part, index) => (
+                <span
+                  key={index}
+                  className={part.bold ? 'font-medium text-slate-900' : undefined}
+                >
+                  {part.text}
+                </span>
+              ))}
             </p>
           )}
           <EventNotesCallout notes={notes} eventType={eventType} />
