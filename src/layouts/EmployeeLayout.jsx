@@ -3,6 +3,7 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { Monitor, History, Bell, Menu, X } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth.js'
 import { useNotifications } from '../hooks/useNotifications.js'
+import { useMyActiveAssets } from '../hooks/useMyActiveAssets.js'
 import BrandLogo from '../components/BrandLogo.jsx'
 import { EMPLOYEE_DASHBOARD_PATH, EMPLOYEE_HISTORY_PATH, EMPLOYEE_NOTIFICATIONS_PATH } from '../constants/routes.js'
 
@@ -17,6 +18,8 @@ function EmployeeLayout() {
   const navigate = useNavigate()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const { unreadCount } = useNotifications({ page: 1, limit: 1 })
+  const { assignments } = useMyActiveAssets()
+  const gearCount = assignments.length
 
   function handleLogout() {
     logout()
@@ -33,6 +36,7 @@ function EmployeeLayout() {
       icon: Monitor,
       label: 'My Gear',
       end: true,
+      badge: gearCount,
     },
     {
       to: EMPLOYEE_HISTORY_PATH,

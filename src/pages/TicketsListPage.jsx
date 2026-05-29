@@ -1,11 +1,16 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { AlertCircle } from 'lucide-react'
 import { useTickets } from '../hooks/useTickets.js'
 import { TicketStatus, TICKET_ACTIONS } from '../constants/tickets.js'
 import PageHeader from '../components/PageHeader.jsx'
 import TicketStatusBadge from '../components/TicketStatusBadge.jsx'
 import ReviewTicketModal from '../components/ReviewTicketModal.jsx'
-import Spinner from '../components/Spinner.jsx'
+import PaginationControls from '../components/PaginationControls.jsx'
+import TicketsListSkeleton from '../components/TicketsListSkeleton.jsx'
+import PaginatedListContainer from '../components/PaginatedListContainer.jsx'
+import PaginatedPageShell from '../components/PaginatedPageShell.jsx'
+import PaginatedListEmpty from '../components/PaginatedListEmpty.jsx'
+import { isPaginatedPageFull, isPaginationResultEmpty } from '../utils/paginationUi.js'
 
 const FILTER_TABS = [
   { label: 'All', value: 'all' },
@@ -16,19 +21,43 @@ const FILTER_TABS = [
 
 /**
  * Admin page for viewing and reviewing all support tickets.
- * Lists tickets in a filterable table with status-aware action buttons.
+ * Lists tickets in a filterable, paginated table with status-aware action buttons.
  * Rendered at /admin/tickets inside AdminLayout.
  */
 function TicketsListPage() {
-  const { tickets, isLoading, error, refetch } = useTickets()
+  const [page, setPage] = useState(1)
+  const limit = 15
   const [activeFilter, setActiveFilter] = useState('all')
   const [selectedTicket, setSelectedTicket] = useState(null)
   const [initialAction, setInitialAction] = useState(null)
 
-  const filteredTickets =
-    activeFilter === 'all'
-      ? tickets
-      : tickets.filter((t) => t.status === activeFilter)
+  const statusParam = activeFilter === 'all' ? undefined : activeFilter
+
+  const { tickets, pagination, statusCounts, isPending, isFetching, error, refetch } = useTickets({
+    page,
+    limit,
+    status: statusParam,
+  })
+
+  useEffect(() => {
+    setPage(1)
+  }, [activeFilter])
+
+  function handleFilterChange(value) {
+    setActiveFilter(value)
+  }
+
+  function handlePreviousPage() {
+    if (page > 1) {
+      setPage(page - 1)
+    }
+  }
+
+  function handleNextPage() {
+    if (pagination && page < pagination.total_pages) {
+      setPage(page + 1)
+    }
+  }
 
   function handleOpenReview(ticket, action) {
     setSelectedTicket(ticket)
@@ -44,49 +73,152 @@ function TicketsListPage() {
     refetch()
   }
 
-  if (isLoading) {
-    return (
-      <div className="px-4 py-6 sm:px-6 sm:py-8">
-        <PageHeader title="Support Tickets" />
-        <Spinner />
-      </div>
-    )
+  function getTabCount(tabValue) {
+    if (!statusCounts) {
+      return 0
+    }
+    if (tabValue === 'all') {
+      return statusCounts.all
+    }
+    if (tabValue === TicketStatus.OPEN) {
+      return statusCounts.open
+    }
+    if (tabValue === TicketStatus.UNDER_REVIEW) {
+      return statusCounts.under_review
+    }
+    if (tabValue === TicketStatus.RESOLVED) {
+      return statusCounts.resolved
+    }
+    return 0
   }
 
-  if (error) {
-    return (
-      <div className="px-4 py-6 sm:px-6 sm:py-8">
-        <PageHeader title="Support Tickets" />
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">
-          <p>{error.message}</p>
-          <button type="button" onClick={refetch} className="mt-2 text-sm underline">
-            Retry
-          </button>
+  const itemCount = tickets ? tickets.length : 0
+  const fillMobileViewport = isPending || isPaginatedPageFull(itemCount, limit)
+
+  let mainContent = null
+
+  if (isPending) {
+    mainContent = (
+      <>
+        <div className="hidden sm:block">
+          <TicketsListSkeleton count={limit} />
         </div>
+        <PaginatedListContainer
+          className="sm:hidden"
+          borderRadiusClass="rounded-2xl"
+          fillViewport={fillMobileViewport}
+        >
+          <TicketsListSkeleton count={limit} />
+        </PaginatedListContainer>
+      </>
+    )
+  } else if (error) {
+    mainContent = (
+      <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">
+        <p>{error.message}</p>
+        <button type="button" onClick={refetch} className="mt-2 text-sm underline">
+          Retry
+        </button>
       </div>
+    )
+  } else if (isPaginationResultEmpty(pagination)) {
+    mainContent = (
+      <PaginatedListEmpty
+        icon={AlertCircle}
+        title="No tickets found"
+        description={
+          activeFilter === 'all'
+            ? 'No support tickets have been submitted yet.'
+            : 'No tickets match this filter.'
+        }
+      />
+    )
+  } else {
+    mainContent = (
+      <>
+        <div className="hidden overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm sm:block">
+          <table className="min-w-full divide-y divide-slate-200">
+            <thead className="bg-slate-50">
+              <tr>
+                <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  Asset
+                </th>
+                <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  Employee
+                </th>
+                <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  Issue Description
+                </th>
+                <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  Status
+                </th>
+                <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  Date Reported
+                </th>
+                <th className="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {tickets.map((ticket) => (
+                <TicketTableRow
+                  key={ticket.id}
+                  ticket={ticket}
+                  onAction={handleOpenReview}
+                />
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <PaginatedListContainer
+          className="sm:hidden"
+          borderRadiusClass="rounded-2xl"
+          fillViewport={fillMobileViewport}
+        >
+          <div className="flex flex-col divide-y divide-slate-200">
+            {tickets.map((ticket) => (
+              <TicketMobileCard
+                key={ticket.id}
+                ticket={ticket}
+                onAction={handleOpenReview}
+              />
+            ))}
+          </div>
+        </PaginatedListContainer>
+      </>
     )
   }
 
   return (
-    <div className="px-4 py-6 sm:px-6 sm:py-8">
-      <PageHeader
-        title="Support Tickets"
-      />
+    <PaginatedPageShell>
+      <div className="mb-2 shrink-0 sm:mb-3">
+        <PageHeader title="Support Tickets" />
+        <div className="mt-1">
+          <div className="mt-2 flex justify-end">
+            <PaginationControls
+              pagination={pagination}
+              page={page}
+              onPrevious={handlePreviousPage}
+              onNext={handleNextPage}
+              isFetching={isFetching}
+              ariaLabel="Support tickets pagination"
+            />
+          </div>
+        </div>
+      </div>
 
-      {/* Filter tabs */}
-      <div className="mb-6 overflow-x-auto">
+      <div className="mb-4 shrink-0 overflow-x-auto sm:mb-6">
         <div className="flex min-w-max gap-2">
           {FILTER_TABS.map((tab) => {
-            const count =
-              tab.value === 'all'
-                ? tickets.length
-                : tickets.filter((t) => t.status === tab.value).length
+            const count = getTabCount(tab.value)
             const isActive = activeFilter === tab.value
             return (
               <button
                 key={tab.value}
                 type="button"
-                onClick={() => setActiveFilter(tab.value)}
+                onClick={() => handleFilterChange(tab.value)}
                 className={`inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
                   isActive
                     ? 'bg-emerald-600 text-white shadow-sm'
@@ -107,66 +239,7 @@ function TicketsListPage() {
         </div>
       </div>
 
-      {/* Table — desktop */}
-      {filteredTickets.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-white py-16 text-center">
-          <AlertCircle className="mb-3 h-10 w-10 text-slate-300" />
-          <p className="text-sm font-medium text-slate-600">No tickets found</p>
-          <p className="mt-1 text-xs text-slate-400">
-            {activeFilter === 'all' ? 'No support tickets have been submitted yet.' : 'No tickets match this filter.'}
-          </p>
-        </div>
-      ) : (
-        <>
-          {/* Desktop table */}
-          <div className="hidden overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm sm:block">
-            <table className="min-w-full divide-y divide-slate-200">
-              <thead className="bg-slate-50">
-                <tr>
-                  <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                    Asset
-                  </th>
-                  <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                    Employee
-                  </th>
-                  <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                    Issue Description
-                  </th>
-                  <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                    Status
-                  </th>
-                  <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                    Date Reported
-                  </th>
-                  <th className="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {filteredTickets.map((ticket) => (
-                  <TicketTableRow
-                    key={ticket.id}
-                    ticket={ticket}
-                    onAction={handleOpenReview}
-                  />
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Mobile cards */}
-          <div className="grid grid-cols-1 gap-3 sm:hidden">
-            {filteredTickets.map((ticket) => (
-              <TicketMobileCard
-                key={ticket.id}
-                ticket={ticket}
-                onAction={handleOpenReview}
-              />
-            ))}
-          </div>
-        </>
-      )}
+      {mainContent}
 
       <ReviewTicketModal
         isOpen={selectedTicket !== null}
@@ -175,7 +248,7 @@ function TicketsListPage() {
         initialAction={initialAction}
         onSuccess={handleReviewSuccess}
       />
-    </div>
+    </PaginatedPageShell>
   )
 }
 
@@ -228,7 +301,7 @@ function TicketMobileCard({ ticket, onAction }) {
   })
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+    <article className="w-full bg-white p-4">
       <div className="mb-3 flex items-start justify-between gap-2">
         <div className="min-w-0">
           <p className="truncate font-medium text-slate-900">{assetName}</p>
@@ -241,7 +314,7 @@ function TicketMobileCard({ ticket, onAction }) {
         <p className="text-xs text-slate-400">{dateReported}</p>
         <TicketActionButton ticket={ticket} onAction={onAction} />
       </div>
-    </div>
+    </article>
   )
 }
 

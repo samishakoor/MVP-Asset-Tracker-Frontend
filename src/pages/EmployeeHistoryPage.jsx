@@ -41,7 +41,7 @@ function formatDate(dateStr) {
  */
 function EmployeeHistoryPage() {
   const [page, setPage] = useState(1)
-  const limit = 10
+  const limit = 15
 
   const { history, pagination, isPending, isFetching, error, refetch } = useMyHistory({
     page,

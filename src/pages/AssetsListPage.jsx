@@ -1,19 +1,28 @@
 import { useState, useMemo, useRef, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Eye, Pencil, X } from 'lucide-react'
+import { Eye, Pencil, X, Package } from 'lucide-react'
 import { ADMIN_ASSETS_NEW_PATH, adminAssetDetailPath, adminAssetEditPath } from '../constants/routes.js'
 import { ASSET_STATUS_OPTIONS } from '../constants/assets.js'
 import { useAssets } from '../hooks/useAssets.js'
 import { useEmployees } from '../hooks/useEmployees.js'
 import { formatAssetTypeLabel } from '../utils/assetType.js'
 import { useAssetTypes } from '../hooks/useAssetTypes.js'
-import { PageHeader, Spinner, Table, Badge } from '../components/index.js'
+import PageHeader from '../components/PageHeader.jsx'
+import Badge from '../components/Badge.jsx'
+import PaginationControls from '../components/PaginationControls.jsx'
+import AssetsListSkeleton from '../components/AssetsListSkeleton.jsx'
+import PaginatedListContainer from '../components/PaginatedListContainer.jsx'
+import PaginatedPageShell from '../components/PaginatedPageShell.jsx'
+import PaginatedListEmpty from '../components/PaginatedListEmpty.jsx'
+import { isPaginatedPageFull, isPaginationResultEmpty } from '../utils/paginationUi.js'
 
 /**
- * Admin asset inventory page with filters and table view.
+ * Admin asset inventory page with filters and paginated table view.
  * Rendered at /admin/assets inside AdminLayout (admin role only).
  */
 function AssetsListPage() {
+  const [page, setPage] = useState(1)
+  const limit = 8
   const [statusFilter, setStatusFilter] = useState('')
   const [typeFilter, setTypeFilter] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
@@ -44,6 +53,10 @@ function AssetsListPage() {
     return () => document.removeEventListener('mousedown', handleMouseDown)
   }, [])
 
+  useEffect(() => {
+    setPage(1)
+  }, [statusFilter, typeFilter, searchQuery, selectedEmployee])
+
   function handleAssigneeInputChange(event) {
     setAssigneeInput(event.target.value)
     setSelectedEmployee(null)
@@ -62,101 +75,146 @@ function AssetsListPage() {
     setShowSuggestions(false)
   }
 
+  function handlePreviousPage() {
+    if (page > 1) {
+      setPage(page - 1)
+    }
+  }
+
+  function handleNextPage() {
+    if (pagination && page < pagination.total_pages) {
+      setPage(page + 1)
+    }
+  }
+
   const filters = useMemo(
     () => ({
       status: statusFilter,
       asset_type: typeFilter,
       employee_id: selectedEmployee ? selectedEmployee.id : undefined,
+      search: searchQuery.trim() ? searchQuery.trim() : undefined,
     }),
-    [statusFilter, typeFilter, selectedEmployee]
+    [statusFilter, typeFilter, selectedEmployee, searchQuery]
   )
 
-  const { assets, isLoading, error, refetch } = useAssets(filters)
+  const { assets, pagination, isPending, isFetching, error, refetch } = useAssets(filters, {
+    page,
+    limit,
+  })
 
-  const filteredAssets = useMemo(() => {
-    if (!searchQuery.trim()) {
-      return assets
-    }
+  const itemCount = assets ? assets.length : 0
+  const fillMobileViewport = isPending || isPaginatedPageFull(itemCount, limit)
 
-    const query = searchQuery.toLowerCase()
-    return assets.filter(
-      (asset) =>
-        asset.name.toLowerCase().includes(query) ||
-        asset.serialNumber.toLowerCase().includes(query)
-    )
-  }, [assets, searchQuery])
+  let listContent = null
 
-  const columns = [
-    { key: 'name', label: 'Name' },
-    {
-      key: 'assetType',
-      label: 'Type',
-      render: (value) => <span>{formatAssetTypeLabel(value)}</span>,
-    },
-    { key: 'serialNumber', label: 'Serial Number' },
-    {
-      key: 'condition',
-      label: 'Condition',
-      render: (value) => <span className="capitalize">{value}</span>,
-    },
-    {
-      key: 'status',
-      label: 'Status',
-      render: (value) => <Badge status={value} />,
-    },
-    {
-      key: 'assignedEmployeeName',
-      label: 'Assigned To',
-      render: (value, row) => {
-        if (row.status === 'available') {
-          return <span className="text-slate-400">—</span>
-        }
-        return value || <span className="text-slate-400">—</span>
-      },
-    },
-    {
-      key: 'id',
-      label: 'Actions',
-      render: (value) => (
-        <div className="flex items-center gap-2">
-          <Link
-            to={adminAssetDetailPath(value)}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-slate-100 px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-200"
-          >
-            <Eye className="h-4 w-4" />
-            View
-          </Link>
-          <Link
-            to={adminAssetEditPath(value)}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-50 px-3 py-1.5 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-100"
-          >
-            <Pencil className="h-4 w-4" />
-            Edit
-          </Link>
+  if (isPending) {
+    listContent = (
+      <>
+        <div className="hidden sm:block">
+          <AssetsListSkeleton count={limit} />
         </div>
-      ),
-    },
-  ]
+        <PaginatedListContainer
+          className="sm:hidden"
+          borderRadiusClass="rounded-2xl"
+          fillViewport={fillMobileViewport}
+        >
+          <AssetsListSkeleton count={limit} />
+        </PaginatedListContainer>
+      </>
+    )
+  } else if (error) {
+    listContent = (
+      <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">
+        <p className="text-sm">{error.message || 'Failed to load assets'}</p>
+        <button
+          type="button"
+          onClick={() => refetch()}
+          className="mt-2 text-sm font-medium underline"
+        >
+          Retry
+        </button>
+      </div>
+    )
+  } else if (isPaginationResultEmpty(pagination)) {
+    listContent = (
+      <PaginatedListEmpty
+        icon={Package}
+        title="No assets found"
+        description="Try adjusting your filters or register a new asset."
+      />
+    )
+  } else {
+    listContent = (
+      <>
+        <div className="hidden overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm sm:block">
+          <table className="min-w-full divide-y divide-slate-200">
+            <thead className="bg-slate-50">
+              <tr>
+                <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  Name
+                </th>
+                <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  Type
+                </th>
+                <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  Serial Number
+                </th>
+                <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  Condition
+                </th>
+                <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  Status
+                </th>
+                <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  Assigned To
+                </th>
+                <th className="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {assets.map((asset) => (
+                <AssetTableRow key={asset.id} asset={asset} />
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <PaginatedListContainer
+          className="sm:hidden"
+          borderRadiusClass="rounded-2xl"
+          fillViewport={fillMobileViewport}
+        >
+          <div className="flex flex-col divide-y divide-slate-200">
+            {assets.map((asset) => (
+              <AssetMobileCard key={asset.id} asset={asset} />
+            ))}
+          </div>
+        </PaginatedListContainer>
+      </>
+    )
+  }
 
   return (
-    <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-      <PageHeader
-        title="Inventory"
-        subtitle="Browse and manage company hardware assets"
-        action={
-          <Link
-            to={ADMIN_ASSETS_NEW_PATH}
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            Register Asset
-          </Link>
-        }
-      />
+    <PaginatedPageShell>
+      <div className="mb-2 shrink-0 sm:mb-3">
+        <PageHeader
+          title="Inventory"
+          subtitle="Browse and manage company hardware assets"
+          action={
+            <Link
+              to={ADMIN_ASSETS_NEW_PATH}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-700 sm:w-auto"
+            >
+              Register Asset
+            </Link>
+          }
+        />
+      </div>
 
-      {/* Filter Bar */}
-      <div className="mb-6 rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+      <div className="mb-4 shrink-0 rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:mb-6 sm:p-6">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {/* Search Input */}
           <div>
             <label htmlFor="search-input" className="block text-sm font-medium text-slate-700">
               Search
@@ -171,7 +229,6 @@ function AssetsListPage() {
             />
           </div>
 
-          {/* Status Filter */}
           <div>
             <label htmlFor="status-filter" className="block text-sm font-medium text-slate-700">
               Filter by Status
@@ -191,7 +248,6 @@ function AssetsListPage() {
             </select>
           </div>
 
-          {/* Type Filter */}
           <div>
             <label htmlFor="type-filter" className="block text-sm font-medium text-slate-700">
               Filter by Type
@@ -212,7 +268,6 @@ function AssetsListPage() {
             </select>
           </div>
 
-          {/* Assignee Search Filter */}
           <div ref={assigneeContainerRef} className="relative">
             <label htmlFor="assignee-filter" className="block text-sm font-medium text-slate-700">
               Filter by Assignee
@@ -283,32 +338,121 @@ function AssetsListPage() {
         </div>
       </div>
 
-      {/* Assets Table or Empty State */}
-      {isLoading ? (
-        <Spinner />
-      ) : error ? (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">
-          <p className="text-sm">{error.message || 'Failed to load assets'}</p>
-          <button
-            type="button"
-            onClick={() => refetch()}
-            className="mt-2 text-sm font-medium underline"
+      <div className="mb-3 flex shrink-0 justify-end sm:mb-4">
+        <PaginationControls
+          pagination={pagination}
+          page={page}
+          onPrevious={handlePreviousPage}
+          onNext={handleNextPage}
+          isFetching={isFetching}
+          ariaLabel="Assets pagination"
+        />
+      </div>
+
+      {listContent}
+    </PaginatedPageShell>
+  )
+}
+
+/**
+ * Desktop table row for a single asset in the inventory list.
+ */
+function AssetTableRow({ asset }) {
+  const assignedLabel =
+    asset.status === 'available'
+      ? '—'
+      : asset.assignedEmployeeName || '—'
+
+  return (
+    <tr className="transition-colors hover:bg-slate-50">
+      <td className="px-5 py-4 font-medium text-slate-900">{asset.name}</td>
+      <td className="px-5 py-4 text-sm capitalize text-slate-600">
+        {formatAssetTypeLabel(asset.assetType)}
+      </td>
+      <td className="px-5 py-4 font-mono text-sm text-slate-600">{asset.serialNumber}</td>
+      <td className="px-5 py-4 text-sm capitalize text-slate-600">{asset.condition}</td>
+      <td className="px-5 py-4">
+        <Badge status={asset.status} />
+      </td>
+      <td className="px-5 py-4 text-sm text-slate-600">
+        {assignedLabel === '—' ? (
+          <span className="text-slate-400">—</span>
+        ) : (
+          assignedLabel
+        )}
+      </td>
+      <td className="px-5 py-4 text-right">
+        <div className="flex items-center justify-end gap-2">
+          <Link
+            to={adminAssetDetailPath(asset.id)}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-slate-100 px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-200"
           >
-            Retry
-          </button>
+            <Eye className="h-4 w-4" />
+            View
+          </Link>
+          <Link
+            to={adminAssetEditPath(asset.id)}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-50 px-3 py-1.5 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-100"
+          >
+            <Pencil className="h-4 w-4" />
+            Edit
+          </Link>
         </div>
-      ) : filteredAssets.length === 0 ? (
-        <div className="rounded-lg border border-slate-200 bg-slate-50 p-12 text-center">
-          <p className="text-sm text-slate-600">
-            {assets.length === 0
-              ? 'No assets found.'
-              : 'No assets match your filters.'}
+      </td>
+    </tr>
+  )
+}
+
+/**
+ * Mobile card for a single asset in the inventory list.
+ */
+function AssetMobileCard({ asset }) {
+  const assignedLabel =
+    asset.status === 'available'
+      ? '—'
+      : asset.assignedEmployeeName || '—'
+
+  return (
+    <article className="w-full bg-white p-4">
+      <div className="mb-3 flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <p className="truncate font-semibold text-slate-900">{asset.name}</p>
+          <p className="mt-0.5 text-xs capitalize text-slate-500">
+            {formatAssetTypeLabel(asset.assetType)}
           </p>
         </div>
-      ) : (
-        <Table columns={columns} data={filteredAssets} />
-      )}
-    </main>
+        <Badge status={asset.status} />
+      </div>
+
+      <p className="mb-2 font-mono text-xs text-slate-500">{asset.serialNumber}</p>
+
+      <div className="mb-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
+        <span>
+          <span className="font-medium text-slate-700">Condition:</span>{' '}
+          <span className="capitalize">{asset.condition}</span>
+        </span>
+        <span>
+          <span className="font-medium text-slate-700">Assigned:</span> {assignedLabel}
+        </span>
+      </div>
+
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <Link
+          to={adminAssetDetailPath(asset.id)}
+          className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-200"
+        >
+          <Eye className="h-4 w-4" />
+          View
+        </Link>
+        <Link
+          to={adminAssetEditPath(asset.id)}
+          className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-100"
+        >
+          <Pencil className="h-4 w-4" />
+          Edit
+        </Link>
+      </div>
+    </article>
   )
 }
 

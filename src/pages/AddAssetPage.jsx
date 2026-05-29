@@ -203,10 +203,10 @@ function AddAssetPage() {
             </label>
             <textarea
               id="notes"
-              rows={4}
+              rows={5}
               value={formData.notes}
               onChange={(e) => handleChange('notes', e.target.value)}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="mt-1 max-h-[7.5rem] min-h-[7.5rem] w-full resize-none overflow-y-auto rounded-lg border border-slate-300 px-3 py-2 text-sm leading-5 text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
               placeholder="Any additional information about this asset..."
             />
           </div>

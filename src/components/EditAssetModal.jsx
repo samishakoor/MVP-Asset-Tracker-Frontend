@@ -134,10 +134,10 @@ function EditAssetModal({ isOpen, onClose, asset, onSuccess }) {
                 </label>
                 <textarea
                   id="edit-asset-notes"
-                  rows={3}
+                  rows={5}
                   value={notes}
                   onChange={(event) => setNotes(event.target.value)}
-                  className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                  className="mt-1 max-h-[7.5rem] min-h-[7.5rem] w-full resize-none overflow-y-auto rounded-lg border border-slate-300 px-3 py-2 text-sm leading-5 text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
                 />
               </div>
             </div>

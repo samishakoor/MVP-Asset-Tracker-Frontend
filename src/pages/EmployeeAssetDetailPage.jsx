@@ -63,7 +63,7 @@ function EmployeeAssetDetailPage() {
 
     try {
       await createTicket({ assignmentId: asset.activeAssignment.id, description: trimmed })
-      setSuccessMessage('Issue reported — IT has been notified.')
+      setSuccessMessage('Issue reported. IT has been notified.')
       setDescription('')
       refetch()
     } catch (err) {

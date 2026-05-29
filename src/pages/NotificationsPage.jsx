@@ -99,23 +99,11 @@ function NotificationsPage() {
     <PaginatedPageShell>
       <div className="mb-2 shrink-0 sm:mb-3">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <div className="min-w-0 flex-1">
+          <div className="min-w-0">
             <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">Notifications</h1>
-            <div className="mt-1">
-              <p className="text-sm text-slate-600 sm:text-base">
-                Stay updated on your asset activities
-              </p>
-              <div className="mt-2 flex justify-end">
-                <PaginationControls
-                  pagination={pagination}
-                  page={page}
-                  onPrevious={handlePreviousPage}
-                  onNext={handleNextPage}
-                  isFetching={isFetching}
-                  ariaLabel="Notification pagination"
-                />
-              </div>
-            </div>
+            <p className="mt-1 text-sm text-slate-600 sm:text-base">
+              Stay updated on your asset activities
+            </p>
           </div>
           {unreadCount > 0 && (
             <button
@@ -128,6 +116,17 @@ function NotificationsPage() {
             </button>
           )}
         </div>
+      </div>
+
+      <div className="mb-3 flex shrink-0 justify-end sm:mb-4">
+        <PaginationControls
+          pagination={pagination}
+          page={page}
+          onPrevious={handlePreviousPage}
+          onNext={handleNextPage}
+          isFetching={isFetching}
+          ariaLabel="Notification pagination"
+        />
       </div>
 
       {listArea}
