@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Eye, Pencil, X, Package } from 'lucide-react'
+import { Eye, Pencil, X, Package, Filter, ChevronDown, ChevronUp } from 'lucide-react'
 import { ADMIN_ASSETS_NEW_PATH, adminAssetDetailPath, adminAssetEditPath } from '../constants/routes.js'
 import { ASSET_STATUS_OPTIONS } from '../constants/assets.js'
 import { useAssets } from '../hooks/useAssets.js'
@@ -29,6 +29,7 @@ function AssetsListPage() {
   const [assigneeInput, setAssigneeInput] = useState('')
   const [selectedEmployee, setSelectedEmployee] = useState(null)
   const [showSuggestions, setShowSuggestions] = useState(false)
+  const [showMobileFilters, setShowMobileFilters] = useState(false)
   const assigneeContainerRef = useRef(null)
 
   const { employees } = useEmployees()
@@ -213,7 +214,32 @@ function AssetsListPage() {
         />
       </div>
 
-      <div className="mb-4 shrink-0 rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:mb-6 sm:p-6">
+      {/* Mobile Filter Toggle Button */}
+      <div className="mb-3 shrink-0 sm:hidden">
+        <button
+          type="button"
+          onClick={() => setShowMobileFilters(!showMobileFilters)}
+          className="flex w-full items-center justify-between rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50"
+        >
+          <span className="flex items-center gap-2">
+            <Filter className="h-4 w-4" />
+            Filters
+            {(statusFilter || typeFilter || searchQuery || selectedEmployee) && (
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-600 text-xs font-bold text-white">
+                {[statusFilter, typeFilter, searchQuery, selectedEmployee].filter(Boolean).length}
+              </span>
+            )}
+          </span>
+          {showMobileFilters ? (
+            <ChevronUp className="h-4 w-4" />
+          ) : (
+            <ChevronDown className="h-4 w-4" />
+          )}
+        </button>
+      </div>
+
+      {/* Filter Panel */}
+      <div className={`mb-4 shrink-0 rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:mb-6 sm:block sm:p-6 ${showMobileFilters ? 'block' : 'hidden'}`}>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <label htmlFor="search-input" className="block text-sm font-medium text-slate-700">
