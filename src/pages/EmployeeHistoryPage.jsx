@@ -60,7 +60,7 @@ function EmployeeHistoryPage() {
 
   if (isPending) {
     mainContent = (
-      <div className="min-h-0 flex-1 overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
         <HistoryPageSkeleton count={limit} />
       </div>
     )
@@ -91,7 +91,7 @@ function EmployeeHistoryPage() {
     )
   } else {
     mainContent = (
-      <div className="min-h-0 flex-1 overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
         {/* Desktop table */}
         <div className="hidden sm:block">
           <table className="min-w-full divide-y divide-slate-200">
@@ -145,14 +145,14 @@ function EmployeeHistoryPage() {
           </table>
         </div>
 
-        {/* Mobile cards */}
-        <div className="grid grid-cols-1 gap-3 p-3 sm:hidden">
+        {/* Mobile rows — full width inside scroll container */}
+        <div className="flex flex-col divide-y divide-slate-200 sm:hidden">
           {history.map((item) => {
             const days = daysBetween(item.assignedAt, item.returnedAt)
             return (
-              <div
+              <article
                 key={item.id}
-                className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
+                className="w-full bg-white p-4"
               >
                 <div className="mb-2 flex items-start justify-between gap-2">
                   <div className="min-w-0">
@@ -178,7 +178,7 @@ function EmployeeHistoryPage() {
                     {formatDate(item.returnedAt)}
                   </span>
                 </div>
-              </div>
+              </article>
             )
           })}
         </div>
