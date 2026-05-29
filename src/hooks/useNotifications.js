@@ -12,7 +12,7 @@ import { apiRequest } from '../utils/api.js'
 export function useNotifications(params) {
   const { page, limit } = params
 
-  const { data, isFetching, error, refetch } = useQuery({
+  const { data, isPending, isFetching, error, refetch } = useQuery({
     queryKey: ['notifications', page, limit],
     queryFn: async () => {
       const response = await apiRequest(
@@ -28,6 +28,7 @@ export function useNotifications(params) {
     notifications: data?.notifications ?? [],
     unreadCount: data?.unreadCount ?? 0,
     pagination: data?.pagination || null,
+    isPending,
     isFetching,
     error,
     refetch,

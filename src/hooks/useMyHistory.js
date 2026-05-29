@@ -2,22 +2,29 @@ import { useQuery } from '@tanstack/react-query'
 import { apiRequest } from '../utils/api.js'
 
 /**
- * Fetches returned assignment history for the current employee
+ * Fetches paginated returned assignment history for the current employee
  * via GET /users/me/history.
- * Uses react-query with key ['my-history'].
  */
-export function useMyHistory() {
-  const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ['my-history'],
+export function useMyHistory(params) {
+  const page = params.page
+  const limit = params.limit
+
+  const { data, isPending, isFetching, error, refetch } = useQuery({
+    queryKey: ['my-history', page, limit],
     queryFn: async () => {
-      const response = await apiRequest('/users/me/history', { method: 'GET' })
+      const response = await apiRequest(
+        `/users/me/history?page=${page}&limit=${limit}`,
+        { method: 'GET' },
+      )
       return response.data
     },
   })
 
   return {
-    history: data ?? [],
-    isLoading,
+    history: data?.history ?? [],
+    pagination: data?.pagination ?? null,
+    isPending,
+    isFetching,
     error,
     refetch,
   }

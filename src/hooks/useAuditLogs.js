@@ -11,7 +11,7 @@ import { apiRequest } from '../utils/api.js'
 export function useAuditLogs(params) {
   const { page, limit } = params
 
-  const { data, isLoading, isFetching, error, refetch } = useQuery({
+  const { data, isPending, isFetching, error, refetch } = useQuery({
     queryKey: ['audit-logs', page, limit],
     queryFn: async () => {
       const response = await apiRequest(
@@ -25,7 +25,7 @@ export function useAuditLogs(params) {
   return {
     events: data?.events || [],
     pagination: data?.pagination || null,
-    isLoading,
+    isPending,
     isFetching,
     error,
     refetch,
