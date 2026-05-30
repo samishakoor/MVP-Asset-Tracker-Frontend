@@ -1,6 +1,6 @@
 /**
  * Dashed-border empty state for paginated list pages (matches Support Tickets empty card).
- * Render outside PaginatedListContainer when pagination total is zero.
+ * Render outside PaginatedListContainer when pagination total_records is zero.
  */
 function PaginatedListEmpty({ icon: Icon, title, description }) {
   return (

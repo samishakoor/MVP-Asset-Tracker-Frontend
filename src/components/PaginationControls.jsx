@@ -6,7 +6,7 @@ import { ArrowLeft, ArrowRight } from 'lucide-react'
  * Used on AuditLogsPage, NotificationsPage, EmployeeHistoryPage, AssetsListPage, and TicketsListPage.
  */
 function PaginationControls({ pagination, page, onPrevious, onNext, isFetching, ariaLabel }) {
-  if (!pagination || pagination.total === 0 || pagination.total_pages === 0) {
+  if (!pagination || pagination.total_records === 0 || pagination.total_pages === 0) {
     return null
   }
 

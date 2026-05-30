@@ -16,5 +16,5 @@ export function isPaginatedPageFull(itemCount, pageSize) {
  * @returns {boolean}
  */
 export function isPaginationResultEmpty(pagination) {
-  return pagination !== null && pagination !== undefined && pagination.total === 0
+  return pagination !== null && pagination !== undefined && pagination.total_records === 0
 }
