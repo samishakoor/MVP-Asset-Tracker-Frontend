@@ -10,7 +10,7 @@ import TicketsListSkeleton from '../components/TicketsListSkeleton.jsx'
 import PaginatedListContainer from '../components/PaginatedListContainer.jsx'
 import PaginatedPageShell from '../components/PaginatedPageShell.jsx'
 import PaginatedListEmpty from '../components/PaginatedListEmpty.jsx'
-import { isPaginatedPageFull, isPaginationResultEmpty } from '../utils/paginationUi.js'
+import { isPaginatedPageFull, isPaginationResultEmpty } from '../utils/paginationHelper.js'
 
 const FILTER_TABS = [
   { label: 'All', value: 'all' },

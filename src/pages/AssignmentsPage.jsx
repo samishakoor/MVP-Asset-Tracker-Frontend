@@ -11,7 +11,7 @@ import PaginatedListContainer from '../components/PaginatedListContainer.jsx'
 import PaginatedListSkeleton from '../components/PaginatedListSkeleton.jsx'
 import { formatDate } from '../utils/datetime.js'
 import { AssetStatus } from '../constants/assets.js'
-import { isPaginatedPageFull, isPaginationResultEmpty } from '../utils/paginationUi.js'
+import { isPaginatedPageFull, isPaginationResultEmpty } from '../utils/paginationHelper.js'
 import { toast } from '../utils/toast.js'
 
 /**

@@ -6,7 +6,7 @@ import HistoryPageSkeleton from '../components/HistoryPageSkeleton.jsx'
 import PaginatedListContainer from '../components/PaginatedListContainer.jsx'
 import PaginatedPageShell from '../components/PaginatedPageShell.jsx'
 import PaginatedListEmpty from '../components/PaginatedListEmpty.jsx'
-import { isPaginatedPageFull, isPaginationResultEmpty } from '../utils/paginationUi.js'
+import { isPaginatedPageFull, isPaginationResultEmpty } from '../utils/paginationHelper.js'
 
 /**
  * Calculates the number of days between two dates.

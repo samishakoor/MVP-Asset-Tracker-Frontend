@@ -19,7 +19,7 @@ import {
   DEFAULT_AUDIT_EVENT_STYLES,
   getAuditLogDescriptionParts,
   getAuditLogTitleParts,
-} from '../utils/auditLogDisplay.js'
+} from '../utils/auditLogHelper.js'
 
 const AUDIT_EVENT_ICONS = {
   registered: PlusCircle,

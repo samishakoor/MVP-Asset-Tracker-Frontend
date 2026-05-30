@@ -7,7 +7,7 @@ import PaginatedListSkeleton from '../components/PaginatedListSkeleton.jsx'
 import PaginatedListContainer from '../components/PaginatedListContainer.jsx'
 import PaginatedPageShell from '../components/PaginatedPageShell.jsx'
 import PaginatedListEmpty from '../components/PaginatedListEmpty.jsx'
-import { isPaginatedPageFull, isPaginationResultEmpty } from '../utils/paginationUi.js'
+import { isPaginatedPageFull, isPaginationResultEmpty } from '../utils/paginationHelper.js'
 
 /**
  * Full audit logs page with paginated event history.

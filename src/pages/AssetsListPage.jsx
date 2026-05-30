@@ -14,7 +14,7 @@ import AssetsListSkeleton from '../components/AssetsListSkeleton.jsx'
 import PaginatedListContainer from '../components/PaginatedListContainer.jsx'
 import PaginatedPageShell from '../components/PaginatedPageShell.jsx'
 import PaginatedListEmpty from '../components/PaginatedListEmpty.jsx'
-import { isPaginatedPageFull, isPaginationResultEmpty } from '../utils/paginationUi.js'
+import { isPaginatedPageFull, isPaginationResultEmpty } from '../utils/paginationHelper.js'
 
 /**
  * Admin asset inventory page with filters and paginated table view.
