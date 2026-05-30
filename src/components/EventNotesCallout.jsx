@@ -3,34 +3,46 @@ import { getEventNoteLabel, getEventNoteVariant, hasEventNotes } from '../utils/
 
 const VARIANT_STYLES = {
   ticket: {
-    container: 'border-amber-300 bg-amber-50/80',
-    icon: 'text-amber-600',
-    label: 'text-amber-800',
+    ring: 'ring-amber-200',
+    surface: 'bg-amber-50',
+    headerBg: 'bg-amber-100',
+    headerBorder: 'border-amber-200',
+    icon: 'text-amber-700',
+    label: 'text-amber-950',
     text: 'text-amber-950',
   },
   repair: {
-    container: 'border-emerald-300 bg-emerald-50/80',
-    icon: 'text-emerald-600',
-    label: 'text-emerald-800',
+    ring: 'ring-emerald-200',
+    surface: 'bg-emerald-50',
+    headerBg: 'bg-emerald-100',
+    headerBorder: 'border-emerald-200',
+    icon: 'text-emerald-700',
+    label: 'text-emerald-950',
     text: 'text-emerald-950',
   },
   admin: {
-    container: 'border-violet-300 bg-violet-50/80',
-    icon: 'text-violet-600',
-    label: 'text-violet-800',
+    ring: 'ring-violet-200',
+    surface: 'bg-violet-50',
+    headerBg: 'bg-violet-100',
+    headerBorder: 'border-violet-200',
+    icon: 'text-violet-700',
+    label: 'text-violet-950',
     text: 'text-violet-950',
   },
   default: {
-    container: 'border-slate-300 bg-slate-50',
-    icon: 'text-slate-500',
-    label: 'text-slate-700',
+    ring: 'ring-slate-200',
+    surface: 'bg-slate-50',
+    headerBg: 'bg-slate-100',
+    headerBorder: 'border-slate-200',
+    icon: 'text-slate-600',
+    label: 'text-slate-900',
     text: 'text-slate-900',
   },
 }
 
 /**
- * Prominent callout for asset event notes (ticket descriptions, repair notes, etc.).
- * Used in admin dashboard recent events and asset audit log timelines.
+ * Card-style callout for asset event notes (issue reported, repair notes, etc.).
+ * Used in audit log lists and asset detail timelines.
  */
 function EventNotesCallout({ notes, eventType }) {
   if (!hasEventNotes(notes)) {
@@ -43,31 +55,33 @@ function EventNotesCallout({ notes, eventType }) {
   const displayNotes = notes.trim()
 
   return (
-    <div
-      className={`mt-3 rounded-lg border border-l-4 p-3 sm:mt-4 sm:p-4 ${styles.container}`}
+    <figure
+      className={`isolate mt-3 w-full min-w-0 overflow-hidden rounded-lg ring-1 ring-inset sm:mt-4 ${styles.ring}`}
       role="note"
       aria-label={label}
     >
-      <div className="flex items-start gap-2.5 sm:gap-3">
-        <span
-          className="mt-0.5 inline-flex size-6 shrink-0 items-center justify-center sm:size-7"
+      <figcaption
+        className={`flex items-center gap-2 border-b px-3 py-2 sm:px-3.5 ${styles.headerBorder} ${styles.headerBg}`}
+      >
+        <MessageSquareQuote
+          className={`size-3.5 shrink-0 ${styles.icon}`}
+          strokeWidth={2}
           aria-hidden="true"
-        >
-          <MessageSquareQuote
-            className={`size-4 overflow-visible ${styles.icon}`}
-            strokeWidth={1.5}
-          />
+        />
+        <span className={`text-xs font-semibold uppercase tracking-wide ${styles.label}`}>
+          {label}
         </span>
-        <div className="min-w-0 flex-1">
-          <p className={`text-xs font-semibold uppercase tracking-wide ${styles.label}`}>
-            {label}
-          </p>
-          <p className={`mt-1.5 whitespace-pre-wrap break-words text-sm leading-relaxed sm:text-[0.9375rem] ${styles.text}`}>
-            {displayNotes}
-          </p>
-        </div>
-      </div>
-    </div>
+      </figcaption>
+      <blockquote
+        className={`m-0 max-h-48 overflow-y-auto border-0 px-3 py-2.5 sm:px-3.5 sm:py-3 ${styles.surface}`}
+      >
+        <p
+          className={`whitespace-pre-wrap text-sm leading-relaxed wrap-anywhere sm:text-[0.9375rem] ${styles.text}`}
+        >
+          {displayNotes}
+        </p>
+      </blockquote>
+    </figure>
   )
 }
 
