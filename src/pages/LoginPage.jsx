@@ -4,8 +4,10 @@ import { Eye, EyeOff, LogIn } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth.js'
 import { useEmailVerification } from '../hooks/useEmailVerification.js'
 import AuthCard from '../components/AuthCard.jsx'
+import AuthDivider from '../components/AuthDivider.jsx'
 import AuthFormAlert from '../components/AuthFormAlert.jsx'
 import AuthTextField from '../components/AuthTextField.jsx'
+import GoogleLoginButton from '../components/GoogleLoginButton.jsx'
 import {
   SIGNUP_PAGE_LINK,
   LOGIN_PAGE_LINK,
@@ -27,13 +29,23 @@ const PRIMARY_BUTTON_CLASS =
 function LoginPage() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { login } = useAuth()
+  const { login, loginWithGoogleToken } = useAuth()
   const { sendVerificationEmail } = useEmailVerification()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isGoogleRedirectProcessing, setIsGoogleRedirectProcessing] = useState(false)
+
+  function navigateAfterLogin(user) {
+    if (user.role === UserRole.ADMIN) {
+      navigate(ADMIN_DASHBOARD_PATH, { replace: true })
+      return
+    }
+
+    navigate(EMPLOYEE_DASHBOARD_PATH, { replace: true })
+  }
 
   useEffect(() => {
     if (location.state?.passwordResetSuccess === true) {
@@ -41,6 +53,56 @@ function LoginPage() {
       navigate(LOGIN_PAGE_LINK, { replace: true, state: {} })
     }
   }, [location.state, navigate])
+
+  useEffect(function handleGoogleOAuthRedirect() {
+    const searchParams = new URLSearchParams(location.search)
+    const oauthError = searchParams.get('error')
+    const token = searchParams.get('token')
+
+    if (oauthError === 'google_auth_failed') {
+      setError('Google sign-in failed. Please try again.')
+      navigate(LOGIN_PAGE_LINK, { replace: true })
+      return
+    }
+
+    if (!token) {
+      return
+    }
+
+    let isCancelled = false
+
+    async function completeGoogleLogin() {
+      setError(null)
+      setIsGoogleRedirectProcessing(true)
+
+      try {
+        const user = await loginWithGoogleToken(token)
+
+        if (isCancelled) {
+          return
+        }
+
+        navigateAfterLogin(user)
+      } catch (err) {
+        if (isCancelled) {
+          return
+        }
+
+        setError(err.message)
+        navigate(LOGIN_PAGE_LINK, { replace: true })
+      } finally {
+        if (!isCancelled) {
+          setIsGoogleRedirectProcessing(false)
+        }
+      }
+    }
+
+    completeGoogleLogin()
+
+    return function cleanup() {
+      isCancelled = true
+    }
+  }, [location.search, loginWithGoogleToken, navigate])
 
   function handleTogglePasswordVisibility() {
     setShowPassword((prev) => !prev)
@@ -53,12 +115,7 @@ function LoginPage() {
 
     try {
       const user = await login(email, password)
-
-      if (user.role === UserRole.ADMIN) {
-        navigate(ADMIN_DASHBOARD_PATH, { replace: true })
-      } else {
-        navigate(EMPLOYEE_DASHBOARD_PATH, { replace: true })
-      }
+      navigateAfterLogin(user)
     } catch (err) {
       if (err.message === AUTH_ERROR_MESSAGE.EMAIL_NOT_VERIFIED) {
         const normalizedEmail = email.trim().toLowerCase()
@@ -103,6 +160,10 @@ function LoginPage() {
         </p>
       }
     >
+      {isGoogleRedirectProcessing ? (
+        <AuthFormAlert variant="info">Completing Google sign-in...</AuthFormAlert>
+      ) : null}
+
       <form onSubmit={handleSubmit} className="space-y-5">
         {error ? <AuthFormAlert variant="error">{error}</AuthFormAlert> : null}
 
@@ -153,10 +214,17 @@ function LoginPage() {
           </div>
         </div>
 
-        <button type="submit" disabled={isSubmitting} className={PRIMARY_BUTTON_CLASS}>
+        <button
+          type="submit"
+          disabled={isSubmitting || isGoogleRedirectProcessing}
+          className={PRIMARY_BUTTON_CLASS}
+        >
           {isSubmitting ? 'Signing in...' : 'Sign in'}
         </button>
       </form>
+
+      <AuthDivider label="Or" />
+      <GoogleLoginButton disabled={isSubmitting || isGoogleRedirectProcessing} />
     </AuthCard>
   )
 }

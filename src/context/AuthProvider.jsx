@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useReducer } from 'react'
 import { AuthContext } from './authContext.js'
 import { apiRequest } from '../utils/api.js'
+import { parseAccessTokenPayload } from '../utils/jwt.js'
 import { UserRole } from '../constants/auth.js'
 
 function getStoredAuth() {
@@ -76,6 +77,25 @@ export function AuthProvider({ children }) {
     return user
   }, [persistAuth])
 
+  const loginWithGoogleToken = useCallback(async (token) => {
+    const payload = parseAccessTokenPayload(token)
+
+    if (!payload.id || !payload.email || !payload.name || !payload.roles || payload.roles.length === 0) {
+      throw new Error('Invalid sign-in token')
+    }
+
+    const user = {
+      id: payload.id,
+      email: payload.email,
+      name: payload.name,
+      role: payload.roles[0],
+      isVerified: true,
+    }
+
+    persistAuth(user, token)
+    return user
+  }, [persistAuth])
+
   const signup = useCallback(async (name, email, password) => {
     const response = await apiRequest('/auth/signup', {
       method: 'POST',
@@ -95,13 +115,14 @@ export function AuthProvider({ children }) {
       isAdmin,
       isEmployee,
       login,
+      loginWithGoogleToken,
       signup,
       logout,
       setUser(user) {
         dispatch({ type: 'SET_USER', payload: user })
       },
     }),
-    [state.user, state.isAuthenticated, isAdmin, isEmployee, login, signup, logout],
+    [state.user, state.isAuthenticated, isAdmin, isEmployee, login, loginWithGoogleToken, signup, logout],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
